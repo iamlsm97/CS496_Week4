@@ -1,21 +1,27 @@
 <template>
-  <div class="roomlist">
-    <h2>Welcome, {{ nickname }}</h2>
-    <div>
-      <div class="room" v-for="room in rooms">
-        <p>title: {{room.title}} </p>
-        <p>maker: {{room.maker}}</p>
-        <p>status: {{room.currentUser}} / {{room.maxUser}}</p>
-        <p>userList: <span v-for="n in room.userList.length">{{room.userList[n - 1]}}, </span></p>
+  <Layout>
+    <div class="roomlist">
+      <h2>Welcome, {{ nickname }}</h2>
+      <div>
+        <div class="room" v-for="room in rooms">
+          <p>title: {{room.title}} </p>
+          <p>maker: {{room.maker}}</p>
+          <p>status: {{room.currentUser}} / {{room.maxUser}}</p>
+          <p>userList: <span v-for="n in room.userList.length">{{room.userList[n - 1]}}, </span></p>
+        </div>
       </div>
     </div>
-  </div>
+  </Layout>
 </template>
 
 <script>
+  import Layout from './Layout'
   import { mapState } from 'vuex'
 
   export default {
+    components: {
+      Layout,
+    },
     data () {
       return {
         rooms: [],
