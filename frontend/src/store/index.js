@@ -3,23 +3,25 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
+const nickname = localStorage.getItem('nickname') ? localStorage.getItem('nickname') : null
+
 const store = {
   state: {
-    account,
+    nickname,
   },
   mutations: {
-    changeAccount (state, account) {
-      state.account = account
+    changeNickname (state, nickname) {
+      state.nickname = nickname
 
-      localStorage.setItem('account', JSON.stringify(account))
+      localStorage.setItem('nickname', nickname)
     },
     setLoading (state, loading) {
       state.loading = loading
     },
   },
   actions: {
-    changeAccount ({ commit }, account) {
-      commit('changeAccount', account)
+    changeNickname ({ commit }, nickname) {
+      commit('changeNickname', nickname)
     },
     setLoading ({ commit }, loading) {
       commit('setLoading', loading)

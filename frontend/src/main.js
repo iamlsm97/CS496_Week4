@@ -10,7 +10,8 @@ import router from './router' // vue-router instance
 sync(store, router) // done.
 
 import axios from 'axios'
-Vue.prototype.$http = axios
+import VueAxios from 'vue-axios'
+Vue.use(VueAxios, axios)
 
 Vue.config.productionTip = false
 
@@ -20,5 +21,5 @@ new Vue({
   router,
   store,
   template: '<App/>',
-  components: { App }
+  components: { App },
 })

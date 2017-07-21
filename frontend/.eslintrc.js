@@ -1,27 +1,48 @@
 // http://eslint.org/docs/user-guide/configuring
 
 module.exports = {
-  root: true,
-  parser: 'babel-eslint',
-  parserOptions: {
-    sourceType: 'module'
+  "extends": "vue",
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true
   },
-  env: {
-    browser: true,
+  "parserOptions": {
+    "ecmaVersion": 8
   },
-  // https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
-  extends: 'standard',
-  // required to lint *.vue files
-  plugins: [
-    'html'
+  "ecmaFeatures": {
+    "es6": true,
+    "es7": true,
+    "classes": true
+  },
+  "plugins": [
+    "html",
+    "babel",
+    "import",
+    "vue",
+    "async-await"
   ],
-  // add your custom rules here
-  'rules': {
-    // allow paren-less arrow functions
-    'arrow-parens': 0,
-    // allow async-await
-    'generator-star-spacing': 0,
-    // allow debugger during development
-    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "./webpack/webpack.config.dev.js"
+      }
+    }
+  },
+  "rules": {
+    "comma-dangle": [1, "always-multiline"],
+    "max-len": [1, 180, 4],
+    "arrow-body-style": [0],
+    "global-require": [0],
+    "no-param-reassign": [0],
+    "import/no-unresolved": [0],
+    "async-await/space-after-async": 2,
+    "async-await/space-after-await": 2,
+    "no-var": 2,
+  },
+  "globals": {
+    "fetch": false,
+    "Headers": false,
+    "localStorage": false
   }
 }

@@ -8,4 +8,8 @@ router.get('/', function(req, res, next) {
   // res.sendFile(path.join(__dirname, '../public', 'index.html'))
 });
 
+router.get('/test', function (req, res, next) {
+  res.send("what the fuck")
+})
+
 module.exports = router;
