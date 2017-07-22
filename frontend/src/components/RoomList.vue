@@ -1,7 +1,6 @@
 <template>
   <Layout>
     <div class="roomlist">
-      <h2>Welcome, {{ nickname }}</h2>
       <div>
         <div class="room" v-for="room in rooms">
           <p>title: {{room.title}} </p>
@@ -16,7 +15,6 @@
 
 <script>
   import Layout from './Layout'
-  import { mapState } from 'vuex'
 
   export default {
     components: {
@@ -35,20 +33,6 @@
         .catch(function (error) {
           console.log(error)
         })
-    },
-    computed: {
-//      rooms: () => {
-//        this.axios.get('/api/roomlist')
-//          .then((response) => {
-//            return response.data
-//          })
-//          .catch(function (error) {
-//            console.log(error)
-//          })
-//      },
-      ...mapState({
-        nickname: 'nickname',
-      }),
     },
   }
 </script>

@@ -11,7 +11,13 @@ sync(store, router) // done.
 
 import axios from 'axios'
 import VueAxios from 'vue-axios'
+
 Vue.use(VueAxios, axios)
+
+import socketio from 'socket.io-client'
+import VueSocketio from 'vue-socket.io'
+
+Vue.use(VueSocketio, socketio('http://localhost:3000'), store)
 
 Vue.config.productionTip = false
 
