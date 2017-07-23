@@ -19,6 +19,12 @@ import VueSocketio from 'vue-socket.io'
 
 Vue.use(VueSocketio, socketio('http://localhost:3000'), store)
 
+import 'expose-loader?$!expose-loader?jQuery!jquery'
+import 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'jquery/dist/jquery.min.js'
+import 'bootstrap/dist/js/bootstrap.min.js'
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

@@ -3,27 +3,97 @@
     <div class="inout">
       <button @click="joinRoom">Join</button>
       <button @click="exitRoom">Exit</button>
-      <button @click="test">Test</button>
     </div>
     <div class="chatSide">
-      <div class="chatArea">
+      <div class="chatArea" ref="p">
         <ul class="messages"></ul>
       </div>
-      <input class="inputMessage" placeholder="Type here..." v-model="message"/>
+      <input class="inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter" @input="onType"/>
+      <button @click="sendMessage">Send</button>
     </div>
   </div>
 </template>
 
 <script>
+  import $ from 'jquery'
+  import { mapState } from 'vuex'
+
+  const FADE_TIME = 150 // ms
+  const TYPING_TIMER_LENGTH = 1000 // ms
+  const COLORS = [
+    '#e21400', '#91580f', '#f8a700', '#f78b00',
+    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
+    '#3b88eb', '#3824aa', '#a700ff', '#d300e7',
+  ]
+
   export default {
     data () {
       return {
+        connected: true,
         message: '',
+        typing: false,
+        lastTypingTime: '',
+        stacks: ['li added!', 'li added!'],
       }
     },
+    computed: {
+      ...mapState({
+        nickname: 'nickname',
+      }),
+    },
     sockets: {
-      testtest: function () {
-        console.log('testtest received')
+      // Whenever the server emits 'login', log the login message
+      login: function (data) {
+        this.connected = true
+        // Display the welcome message
+        const message = 'Welcome to ERS+ Chat – '
+        this.log(message, {
+          prepend: true,
+        })
+        this.addParticipantsMessage(data)
+      },
+
+      // Whenever the server emits 'new message', update the chat body
+      newMessage: function (data) {
+        this.addChatMessage(data)
+      },
+
+      // Whenever the server emits 'user joined', log it in the chat body
+      userJoined: function (data) {
+        this.log(data.nickname + ' joined')
+        this.addParticipantsMessage(data)
+      },
+
+      // Whenever the server emits 'user left', log it in the chat body
+      userLeft: function (data) {
+        this.log(data.nickname + ' left')
+        this.addParticipantsMessage(data)
+        this.removeChatTyping(data)
+      },
+
+      // Whenever the server emits 'typing', show the typing message
+      typing: function (data) {
+        this.addChatTyping(data)
+      },
+
+      // Whenever the server emits 'stop typing', kill the typing message
+      stopTyping: function (data) {
+        this.removeChatTyping(data)
+      },
+
+      disconnect: function () {
+        this.log('you have been disconnected')
+      },
+
+      reconnect: function () {
+        this.log('you have been reconnected')
+        if (this.nickname) {
+          this.$socket.emit('addUser', this.nickname)
+        }
+      },
+
+      reconnectError: function () {
+        this.log('attempt to reconnect has failed')
       },
     },
     methods: {
@@ -33,6 +103,172 @@
       },
       test () {
         this.$socket.emit('test')
+      },
+      addParticipantsMessage (data) {
+        let message = ''
+        if (data.numUsers === 1) {
+          message += "there's 1 participant"
+        } else {
+          message += 'there are ' + data.numUsers + ' participants'
+        }
+        this.log(message)
+      },
+
+      // Sets the client's nickname
+      setnickname () {
+        // Tell the server your nickname
+        this.$socket.emit('addUser', this.nickname)
+      },
+
+      // Sends a chat message
+      sendMessage () {
+        let message = this.message
+        // Prevent markup from being injected into the message
+        message = this.cleanInput(message)
+        // if there is a non-empty message and a socket connection
+        if (message && this.connected) {
+          this.message = ''
+          this.addChatMessage({
+            nickname: this.nickname,
+            message: message,
+          })
+          // tell server to execute 'new message' and send along one parameter
+          this.$socket.emit('newMessage', message)
+        }
+      },
+
+      // Log a message
+      log (message, options) {
+        const $el = $('<li>').addClass('log').text(message)
+        this.addMessageElement($el, options)
+      },
+
+      // Adds the visual chat message to the message list
+      addChatMessage (data, options) {
+        // Don't fade the message in if there is an 'X was typing'
+        const $typingMessages = this.getTypingMessages(data)
+        options = options || {}
+        if ($typingMessages.length !== 0) {
+          options.fade = false
+          $typingMessages.remove()
+        }
+
+        const $nicknameDiv = $('<span class="nickname"/>')
+          .text(data.nickname)
+          .css('color', this.getnicknameColor(data.nickname))
+
+        const $messageBodyDiv = $('<span class="messageBody">')
+          .text(data.message)
+
+        const typingClass = data.typing ? 'typing' : ''
+        const $messageDiv = $('<li class="message"/>')
+          .data('nickname', data.nickname)
+          .addClass(typingClass)
+          .append($nicknameDiv, $messageBodyDiv)
+
+        this.addMessageElement($messageDiv, options)
+      },
+
+      // Adds the visual chat typing message
+      addChatTyping (data) {
+        data.typing = true
+        data.message = 'is typing'
+        this.addChatMessage(data)
+      },
+
+      // Removes the visual chat typing message
+      removeChatTyping (data) {
+        this.getTypingMessages(data).fadeOut(function () {
+          $(this).remove()
+        })
+      },
+
+      // Adds a message element to the messages and scrolls to the bottom
+      // el - The element to add as a message
+      // options.fade - If the element should fade-in (default = true)
+      // options.prepend - If the element should prepend
+      //   all other messages (default = false)
+      addMessageElement (el, options) {
+        const $el = $(el)
+
+        // Setup default options
+        if (!options) {
+          options = {}
+        }
+        if (typeof options.fade === 'undefined') {
+          options.fade = true
+        }
+        if (typeof options.prepend === 'undefined') {
+          options.prepend = false
+        }
+
+//         Apply options
+        if (options.fade) {
+          $el.hide().fadeIn(FADE_TIME)
+        }
+        if (options.prepend) {
+          $('.messages').prepend($el)
+        } else {
+          $('.messages').append($el)
+        }
+//        $messages[0].scrollTop = $messages[0].scrollHeight
+      },
+
+      // Prevents input from having injected markup
+      cleanInput (input) {
+        return $('<div/>').text(input).text()
+      },
+
+      // Updates the typing event
+      updateTyping () {
+        if (this.connected) {
+          if (!this.typing) {
+            this.typing = true
+            this.$socket.emit('typing')
+          }
+          this.lastTypingTime = (new Date()).getTime()
+
+          setTimeout(function () {
+            const typingTimer = (new Date()).getTime()
+            const timeDiff = typingTimer - this.lastTypingTime
+            if (timeDiff >= TYPING_TIMER_LENGTH && this.typing) {
+              this.$socket.emit('stopTyping')
+              this.typing = false
+            }
+          }.bind(this), TYPING_TIMER_LENGTH)
+        }
+      },
+
+      // Gets the 'X is typing' messages of a user
+      getTypingMessages (data) {
+        return $('.typing.message').filter(function (i) {
+          return $(this).data('nickname') === data.nickname
+        })
+      },
+
+//       Gets the color of a nickname through our hash function
+      getnicknameColor (nickname) {
+        // Compute hash code
+        let hash = 7
+        for (let i = 0; i < nickname.length; i++) {
+          hash = nickname.charCodeAt(i) + (hash << 5) - hash
+        }
+        // Calculate color
+        const index = Math.abs(hash % COLORS.length)
+        return COLORS[index]
+      },
+
+      hitEnter () {
+        if (this.nickname) {
+          this.sendMessage()
+          this.$socket.emit('stopTyping')
+          this.typing = false
+        } else {
+          this.setnickname()
+        }
+      },
+      onType () {
+        this.updateTyping()
       },
     },
   }
