@@ -7,7 +7,9 @@
           <p>title: {{room.title}} </p>
           <p>maker: {{room.maker}}</p>
           <p>status: {{room.currentUser}} / {{room.maxUser}}</p>
-          <p>userList: <span v-for="n in room.userList.length">{{room.userList[n - 1]}}, </span></p>
+          <p>userList: <span v-for="n in room.userList.length"
+                             v-if="n != room.userList.length">{{room.userList[n - 1]}}, </span>
+            <span v-else>{{room.userList[n - 1]}}</span></p>
         </div>
       </div>
     </div>

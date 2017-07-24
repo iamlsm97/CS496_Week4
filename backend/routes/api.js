@@ -15,4 +15,22 @@ router.get('/roomlist', function (req, res, next) {
   })
 })
 
+router.post('/roomlist', function (req, res, next) {
+  Models.Room.create(req.body, function (err, room) {
+    if (err) return res.status(500).send({ error: 'database failure' })
+    res.json(room)
+  })
+})
+
+router.get('/fuck', function (req, res, next) {
+  res.json({"result": "fuck!"})
+})
+
+router.delete('/roomlist/:id', function (req, res, next) {
+  Models.Room.findByIdAndRemove(req.params.id, function(err, room) {
+    if (err) return res.status(500).send({ error: 'database failure' })
+    res.json(room)
+  })
+})
+
 module.exports = router
