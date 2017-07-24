@@ -3,7 +3,6 @@ var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
   nickname: String, // primary key
-  userCardList: Array
 }, {versionKey: false});
 
 var roomSchema = new Schema({
@@ -14,6 +13,12 @@ var roomSchema = new Schema({
   currentUser: Number,
   userList: Array,
   gameCardList: Array,
+  player0CardList: Array,
+  player1CardList: Array,
+  player2CardList: Array,
+  player3CardList: Array,
+  turn: Number,
+  rule: String,
 }, {versionKey: false})
 
 module.exports = {

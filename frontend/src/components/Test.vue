@@ -4,10 +4,9 @@
       <b-form-select v-model="selected" :options="options" class="mb-3">
       </b-form-select>
       <div>Selected: <strong>{{ selected }}</strong></div>
+      <button @click="gameStart">Start Game</button>
+      <div>{{ player0CardList }} z {{ player1CardList }} {{ player2CardList }} {{ player3CardList }} {{ gameCardList }}</div>
     </div>
-
-    <div @keyup.space="sendRequest"></div>
-
   </Layout>
 </template>
 
@@ -22,58 +21,60 @@
     data () {
       return {
         rooms: [],
+        roomID: '5972f9fe534f9b11ac09b781',
         selected: null,
+        player0CardList: [],
+        player1CardList: [],
+        player2CardList: [],
+        player3CardList: [],
+        gameCardList: [],
         options: [
           {
-            text: 'Please select some item',
+            text: 'Select a rule',
             value: null,
-          },
-          {
-            text: 'Royals',
-            value: 'Royals',
           }, {
             text: 'Doubles',
             value: 'Doubles',
           }, {
             text: 'Consecutives',
             value: 'Consecutives',
-          }, {
-            text: 'This one is disabled',
-            value: 'd',
-            disabled: true,
           }],
       }
     },
+    sockets: {
+      startError: function () {
+        console.log('Could not start')
+      },
+      gameStarted: function (data) {
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
+      },
+    },
     methods: {
-      sendRequest: function () {
-        this.axios.get('/api/roomlist')
+      gameStart: function () {
+        this.axios.put('/api/roomlist/' + this.roomID, {
+          rule: this.selected,
+        })
           .then((response) => {
-            this.rooms = response.data
+            console.log('Success!')
           })
           .catch(function (error) {
             console.log(error)
           })
+        this.$socket.emit('gameStart', {
+          roomID: this.roomID,
+        })
       },
     },
     created () {
-      /* this.axios.get('/api/roomlist')
-        .then((response) => {
-          this.rooms = response.data
-        })
-        .catch(function (error) {
-          console.log(error)
-        })*/
+      window.addEventListener('keyup', function (event) {
+        alert('Hello world')
+      })
     },
     computed: {
-//      rooms: () => {
-//        this.axios.get('/api/roomlist')
-//          .then((response) => {
-//            return response.data
-//          })
-//          .catch(function (error) {
-//            console.log(error)
-//          })
-//      },
       ...mapState({
         nickname: 'nickname',
       }),
@@ -84,3 +85,4 @@
 <style scoped>
 
 </style>
+

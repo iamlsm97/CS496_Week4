@@ -2,14 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import MainPage from '@/components/MainPage'
 import RoomList from '@/components/RoomList'
-<<<<<<< HEAD
 import Test from '@/components/Test'
-=======
 import Game from '@/components/Game'
-
->>>>>>> e4b1021233af562ba42554b4abb046d3c4d76887
 import store from '@/store/index'
-
 import Hello from '@/components/Hello'
 
 Vue.use(Router)

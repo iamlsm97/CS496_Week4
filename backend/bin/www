@@ -39,6 +39,7 @@ server.on('listening', onListening)
 /**
  * socket.io Listener & Emitter
  */
+let Models = require('../models/schema')
 let numUsers = {}
 // let numUsers = 0
 
@@ -88,6 +89,65 @@ io.on('connection', function (socket) {
       numUsers: numUsers[roomID],
     })
   })
+
+  // when the client emits 'game start', this listens and executes
+  socket.on('gameStart', function (data) {
+    console.log("-----splitting cards")
+
+    roomID = data.roomID
+
+    const cards = Array.from(new Array(52), (x,i) => i + 1)
+
+    for (let i = cards.length; i; i--) {
+      let j = Math.floor(Math.random() * i)
+      console.log(j)
+      let temp = cards[j]
+      cards[j] = cards[i-1]
+      cards[i-1] = temp
+    }
+
+    Models.Room.findByIdAndUpdate(roomID, {player0CardList: cards.slice(0,13), player1CardList: cards.slice(13,26), player2CardList: cards.slice(26,39), player3CardList: cards.slice(39,52)}, {new: true}, function(err, room) {
+      if (err) {
+        console.log('card splitting error')
+        socket.emit('startError')
+      }
+      else {
+        console.log('success')
+        io.to(roomID).emit('gameStarted', {
+          player0CardList: room.player0CardList,
+          player1CardList: room.player1CardList,
+          player2CardList: room.player2CardList,
+          player3CardList: room.player3CardList,
+          gameCardList: room.gameCardList,
+        })
+      }
+    })
+  })
+
+  // when client clicks, executes playing a card
+  socket.on('playCard', function() {
+    console.log('-----someone played a card')
+    let hits = []
+    roomID = data.roomID
+    Models.Room.findById(roomID, function(err, room) {
+      if (err) {
+        console.log('play error')
+        socket.emit('playError')
+      }
+      else {
+        console.log('found room')
+        let rule = room.rule
+        switch(rule) {
+          case 'Doubles':
+
+            break;
+          case 'Consecutives':
+            break;
+        }
+        io.to(roomID).emit('hit', { })
+      }
+    })
+  }
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', function () {

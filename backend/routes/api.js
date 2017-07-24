@@ -26,6 +26,13 @@ router.get('/fuck', function (req, res, next) {
   res.json({"result": "fuck!"})
 })
 
+router.put('/roomlist/:id', function (req, res, next) {
+  Models.Room.findByIdAndUpdate(req.params.id, req.body, {new: true}, function(err, room) {
+    if (err) return res.status(500).send({ error: 'database failure'})
+    res.json(room)
+  })
+})
+
 router.delete('/roomlist/:id', function (req, res, next) {
   Models.Room.findByIdAndRemove(req.params.id, function(err, room) {
     if (err) return res.status(500).send({ error: 'database failure' })
