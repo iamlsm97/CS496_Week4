@@ -27,7 +27,12 @@
       onSubmit () {
         this.changeNickname(
           this.nickname,
-        ).then(() => this.$router.push('/roomlist'))
+        ).then(() => {
+          this.$socket.emit('register', {
+            nickname: this.nickname,
+          })
+          this.$router.push('/roomlist')
+        })
       },
       ...mapActions([
         'changeNickname',

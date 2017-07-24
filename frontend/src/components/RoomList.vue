@@ -1,7 +1,6 @@
 <template>
   <Layout>
     <div class="roomlist">
-      <h2>Welcome, {{ nickname }}</h2>
       <div>
         <div class="room" v-for="room in rooms">
           <p>title: {{room.title}} </p>
@@ -10,6 +9,7 @@
           <p>userList: <span v-for="n in room.userList.length"
                              v-if="n != room.userList.length">{{room.userList[n - 1]}}, </span>
             <span v-else>{{room.userList[n - 1]}}</span></p>
+          <button :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
         </div>
       </div>
     </div>
@@ -19,6 +19,7 @@
 <script>
   import Layout from './Layout'
   import { mapState } from 'vuex'
+  import { mapActions } from 'vuex'
 
   export default {
     components: {
@@ -29,6 +30,27 @@
         rooms: [],
       }
     },
+    computed: {
+      ...mapState({
+        nickname: 'nickname',
+        roomID: 'roomID',
+        joined: 'joined',
+      }),
+    },
+    methods: {
+      joinRoom (roomID) {
+        console.log(roomID)
+        this.changeRoomID(roomID)
+        this.changeJoined(true)
+        this.$socket.emit('addUser', {
+          roomID: this.roomID,
+        })
+      },
+      ...mapActions([
+        'changeRoomID',
+        'changeJoined',
+      ]),
+    },
     created () {
       this.axios.get('/api/roomlist')
         .then((response) => {
@@ -38,25 +60,15 @@
           console.log(error)
         })
     },
-    computed: {
-//      rooms: () => {
-//        this.axios.get('/api/roomlist')
-//          .then((response) => {
-//            return response.data
-//          })
-//          .catch(function (error) {
-//            console.log(error)
-//          })
-//      },
-      ...mapState({
-        nickname: 'nickname',
-      }),
-    },
   }
 </script>
 
 <style scoped>
   .room:hover {
     background-color: #eeeeee;
+  }
+
+  button:disabled {
+    background: #777777;
   }
 </style>
