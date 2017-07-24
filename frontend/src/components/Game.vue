@@ -1,29 +1,36 @@
 <template>
   <Layout>
-    <div>
-      <div class="gameArea">
-        Main Game Area
+    <div class="gameArea" @click="playCard">
+      Main Game Area
+      <div class="deckArea">
+        <div class="deckCard"></div>
       </div>
-      <b-form-select v-model="selected" :options="options" class="mb-3">
-      </b-form-select>
-      <div>Selected: <strong>{{ selected }}</strong></div>
-      <button @click="gameStart">Start Game</button>
-      <div>{{ player0CardList }} {{ player1CardList }} {{ player2CardList }} {{ player3CardList }} {{ gameCardList }}</div>
+      <div class="playerArea">
+        <div class="playerCard" :class="{myTurn: turn===0}">player0</div>
+        <div class="playerCard" :class="{myTurn: turn===1}">player1</div>
+        <div class="playerCard" :class="{myTurn: turn===2}">player2</div>
+        <div class="playerCard" :class="{myTurn: turn===3}">player3</div>
+      </div>
     </div>
+    <b-form-select v-model="selected" :options="options" class="mb-3">
+    </b-form-select>
+    <div>Selected: <strong>{{ selected }}</strong></div>
+    <button @click="gameStart">Start Game</button>
+    <div>{{ player0CardList }} {{ player1CardList }} {{ player2CardList }} {{ player3CardList }} {{ gameCardList }}
+    </div>
+
   </Layout>
 </template>
 
 <script>
   import $ from 'jquery'
-  import Layout from './Layout'
   import { mapState } from 'vuex'
+  import { mapActions } from 'vuex'
+  import Layout from './Layout'
 
   export default {
     components: {
       Layout,
-    },
-    mounted () {
-      $('.messages').append('<li>Game Start!</li>')
     },
     data () {
       return {
@@ -101,8 +108,24 @@
         console.log('game disabled')
         this.eventListener = false
       },
+      turnChange: function (turn) {
+        this.changeTurn(turn)
+      },
+    },
+    computed: {
+      ...mapState({
+        nickname: 'nickname',
+        roomID: 'roomID',
+        turn: 'turn',
+      }),
     },
     methods: {
+      ...mapActions([
+        'changeTurn',
+      ]),
+      playCard () {
+        this.$socket.emit('turnChange', this.turn)
+      },
       gameStart: function () {
         this.axios.put('/api/roomlist/' + this.roomID, {
           rule: this.selected,
@@ -128,18 +151,34 @@
         }
       }.bind(this))
     },
-    computed: {
-      ...mapState({
-        nickname: 'nickname',
-        roomID: 'roomID',
-      }),
+    mounted () {
+      $('.messages').append('<li>Game Start!</li>')
     },
   }
 </script>
 
 <style scoped>
   .gameArea {
-    margin: auto;
+    border: 1px solid;
     font-size: 30px;
   }
+
+  .deckCard {
+    width: 100px;
+    height: 100px;
+    background-color: #00B7FF;
+    display: inline-block;
+  }
+
+  .playerCard {
+    width: 100px;
+    height: 100px;
+    background-color: aquamarine;
+    display: inline-block;
+  }
+
+  .myTurn {
+    background-color: crimson;
+  }
+
 </style>

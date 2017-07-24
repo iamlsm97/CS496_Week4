@@ -130,33 +130,36 @@ io.on('connection', function (socket) {
 
     roomID = data.roomID
 
-    const cards = Array.from(new Array(52), (x,i) => i + 1)
+    const cards = Array.from(new Array(52), (x, i) => i + 1)
 
     for (let i = cards.length; i; i--) {
       let j = Math.floor(Math.random() * i)
       console.log(j)
       let temp = cards[j]
-      cards[j] = cards[i-1]
-      cards[i-1] = temp
+      cards[j] = cards[i - 1]
+      cards[i - 1] = temp
     }
 
-    Models.Room.findByIdAndUpdate(roomID,
-      {player0CardList: cards.slice(0,13), player1CardList: cards.slice(13,26), player2CardList: cards.slice(26,39), player3CardList: cards.slice(39,52), gameCardList: [], currentAlive: [0,1,2,3]},
-      {new: true},
-      function(err, room) {
+
+    Models.Room.findByIdAndUpdate(roomID, {
+      player0CardList: cards.slice(0, 13),
+      player1CardList: cards.slice(13, 26),
+      player2CardList: cards.slice(26, 39),
+      player3CardList: cards.slice(39, 52),
+    }, { new: true }, function (err, room) {
       if (err) {
         console.log('card splitting error')
         socket.emit('startError')
       }
       else {
         console.log('success')
-        hitHelper(socket, roomID,'gameStarted', room, [1])
+        hitHelper(socket, roomID, 'gameStarted', room, [1])
       }
     })
   })
 
   // when client clicks, executes playing a card
-  socket.on('hit', function(data) {
+  socket.on('hit', function (data) {
     console.log('-----someone hit!')
     console.log(socket.nickname)
     hits.push(socket.nickname)
@@ -165,7 +168,8 @@ io.on('connection', function (socket) {
     console.log(roomID)
     let correct = false
 
-    Models.Room.findById(roomID, function(err, room) {
+    Models.Room.findById(roomID, function (err, room) {
+
       if (err) {
         console.log('hit error')
         socket.emit('hitError')
@@ -189,7 +193,7 @@ io.on('connection', function (socket) {
               correct = true
               console.log('correct hit')
             }
-            break;
+            break
           case 'Consecutives':
             console.log("Consecutives!")
             if (gcl.length < 2) {
@@ -204,21 +208,24 @@ io.on('connection', function (socket) {
               correct = true
               console.log('correct hit')
             }
-            break;
+            break
         }
         console.log('after switch')
         if (correct && hits[0] == socket.nickname) {
           let idx = -1
-          for(let i = 0; i< room.userList.length; i++) {
+          for (let i = 0; i < room.userList.length; i++) {
             if (room.userList[i] == socket.nickname) {
-              idx = i;
+              idx = i
               console.log('found user ' + i)
-              break;
+              break
             }
           }
           switch (idx) {
             case 0:
-              Models.Room.findByIdAndUpdate(roomID, {gameCardList: [], player0CardList: [... room.player0CardList, ...room.gameCardList]}, {new: true}, function(err, room1) {
+              Models.Room.findByIdAndUpdate(roomID, {
+                gameCardList: [],
+                player0CardList: [...room.player0CardList, ...room.gameCardList],
+              }, { new: true }, function (err, room1) {
                 if (err) console.log("update winner0 error")
                 else {
                   console.log('update winner0!')
@@ -227,7 +234,10 @@ io.on('connection', function (socket) {
               })
               break
             case 1:
-              Models.Room.findByIdAndUpdate(roomID, {gameCardList: [], player1CardList: [... room.player1CardList, ...room.gameCardList]}, {new: true}, function(err, room1) {
+              Models.Room.findByIdAndUpdate(roomID, {
+                gameCardList: [],
+                player1CardList: [...room.player1CardList, ...room.gameCardList],
+              }, { new: true }, function (err, room1) {
                 if (err) console.log("update winner1 error")
                 else {
                   console.log('update winner1!')
@@ -236,16 +246,22 @@ io.on('connection', function (socket) {
               })
               break
             case 2:
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: [], player2CardList: [... room.player2CardList, ...room.gameCardList]}, {new: true}, function(err, room1) {
-                  if (err) console.log("update winner2 error")
-                  else {
-                    console.log('update winner2!')
-                    hitHelper(socket, roomID, 'hitWin', room1, [1])
-                  }
-                })
+              Models.Room.findByIdAndUpdate(roomID, {
+                gameCardList: [],
+                player2CardList: [...room.player2CardList, ...room.gameCardList],
+              }, { new: true }, function (err, room1) {
+                if (err) console.log("update winner2 error")
+                else {
+                  console.log('update winner2!')
+                  hitHelper(socket, roomID, 'hitWin', room1, [1])
+                }
+              })
               break
             case 3:
-              Models.Room.findByIdAndUpdate(roomID, {gameCardList: [], player3CardList: [... room.player3CardList, ...room.gameCardList]}, {new: true}, function(err, room1) {
+              Models.Room.findByIdAndUpdate(roomID, {
+                gameCardList: [],
+                player3CardList: [...room.player3CardList, ...room.gameCardList],
+              }, { new: true }, function (err, room1) {
                 if (err) console.log("update winner3 error")
                 else {
                   console.log('update winner3!')
@@ -261,11 +277,11 @@ io.on('connection', function (socket) {
         }
         else {
           let idx = -1
-          for(let i = 0; i< room.userList.length; i++) {
+          for (let i = 0; i < room.userList.length; i++) {
             if (room.userList[i] == socket.nickname) {
-              idx = i;
+              idx = i
               console.log('found user')
-              break;
+              break
             }
           }
           let pcl = []
@@ -278,7 +294,11 @@ io.on('connection', function (socket) {
               cal = room.currentAlive.slice()
               cal.shift()
               if (pcl.length === 0) {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player0CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player0CardList: pcl,
+                  currentAlive: cal,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser0 error")
                   else {
                     console.log("update loser0")
@@ -287,7 +307,10 @@ io.on('connection', function (socket) {
                 })
               }
               else {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player0CardList: pcl}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player0CardList: pcl,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser0 error")
                   else {
                     console.log("update loser0")
@@ -303,7 +326,11 @@ io.on('connection', function (socket) {
               cal = room.currentAlive.slice()
               cal.splice(1, 1)
               if (pcl.length === 0) {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player1CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player1CardList: pcl,
+                  currentAlive: cal,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser1 error")
                   else {
                     console.log("update loser1")
@@ -312,7 +339,10 @@ io.on('connection', function (socket) {
                 })
               }
               else {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player1CardList: pcl}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player1CardList: pcl,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser1 error")
                   else {
                     console.log("update loser1")
@@ -328,7 +358,11 @@ io.on('connection', function (socket) {
               cal = room.currentAlive.slice()
               cal.splice(2, 1)
               if (pcl.length === 0) {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player2CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player2CardList: pcl,
+                  currentAlive: cal,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser2 error")
                   else {
                     console.log("update loser2")
@@ -337,7 +371,10 @@ io.on('connection', function (socket) {
                 })
               }
               else {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player2CardList: pcl}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player2CardList: pcl,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser2 error")
                   else {
                     console.log("update loser2")
@@ -353,7 +390,11 @@ io.on('connection', function (socket) {
               cal = room.currentAlive.slice()
               cal.pop()
               if (pcl.length === 0) {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player3CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player3CardList: pcl,
+                  currentAlive: cal,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser3 error")
                   else {
                     console.log("update loser3")
@@ -362,7 +403,10 @@ io.on('connection', function (socket) {
                 })
               }
               else {
-                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player3CardList: pcl}, {new: true}, function(err, room1) {
+                Models.Room.findByIdAndUpdate(roomID, {
+                  gameCardList: gcl,
+                  player3CardList: pcl,
+                }, { new: true }, function (err, room1) {
                   if (err) console.log("update loser3 error")
                   else {
                     console.log("update loser3")
@@ -377,7 +421,6 @@ io.on('connection', function (socket) {
       }
     })
   })
-
 
   // when the client emits 'typing', we broadcast it to others
   socket.on('typing', function () {
@@ -428,6 +471,14 @@ io.on('connection', function (socket) {
     socket.leave(roomID)
 
   })
+
+  socket.on('turnChange', (turn) => {
+    console.log('-----socket turnChange')
+    // change turn info of DB
+    turn = (turn + 1) % 4
+    io.to(roomID).emit('turnChange', turn)
+  })
+
 })
 
 

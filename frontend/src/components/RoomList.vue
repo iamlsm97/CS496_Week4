@@ -9,7 +9,7 @@
           <p>userList: <span v-for="n in room.userList.length"
                              v-if="n != room.userList.length">{{room.userList[n - 1]}}, </span>
             <span v-else>{{room.userList[n - 1]}}</span></p>
-          <button :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
+          <button class="btn btn-primary" :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
         </div>
       </div>
     </div>

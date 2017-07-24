@@ -1,16 +1,20 @@
 <template>
   <div class="mainpage">
-    <h1>Welcome to ERS+</h1>
-    <h2>Login</h2>
-    <form @submit.prevent="onSubmit">
-      <div>
-        <label>nickname</label>
-        <input id="nickname" name="nickname" v-model="nickname" placeholder="Write your nickname"/>
-      </div>
-      <div>
-        <button class="btn btn-primary" :disabled="nickname.length === 0">Login</button>
-      </div>
-    </form>
+    <img id="typo" src="../../static/typo.png"/>
+    <div>
+      <h2>Login with nickname</h2>
+      <form @submit.prevent="onSubmit">
+        <div class="input-group">
+          <div>
+            <input class="form-control" id="nickname" name="nickname" v-model="nickname"
+                   placeholder="your nickname here!"/>
+          </div>
+          <div class="input-group-btn">
+            <button class="btn btn-primary" :disabled="nickname.length === 0">Login</button>
+          </div>
+        </div><!-- /input-group -->
+      </form>
+    </div>
   </div>
 </template>
 
@@ -45,5 +49,12 @@
 </script>
 
 <style scoped>
+  #typo {
+    margin-bottom: 50px;
+  }
 
+  form {
+    margin-left: 100px;
+    margin-right: 100px;
+  }
 </style>

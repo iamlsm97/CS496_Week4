@@ -1,8 +1,8 @@
 <template>
   <div class="chat">
     <div class="buttons">
-      <button @click="exitRoom" :disabled="!joined">Exit Room</button>
-      <button @click="startGame" :disabled="!joined">Game Start</button>
+      <button class="btn btn-primary" @click="exitRoom" :disabled="!joined">Exit Room</button>
+      <button class="btn btn-primary" @click="startGame" :disabled="!joined">Game Start</button>
     </div>
     <div class="chatSide">
       <div class="chatArea" ref="p">
@@ -10,7 +10,7 @@
       </div>
       <input class="inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter" @input="onType"
              :disabled="!joined"/>
-      <button @click="sendMessage" :disabled="!joined">Send</button>
+      <button class="btn btn-primary" @click="sendMessage" :disabled="!joined">Send</button>
     </div>
   </div>
 </template>
