@@ -1,15 +1,16 @@
 <template>
   <div class="chat">
-    <div class="inout">
-      <button @click="joinRoom">Join</button>
-      <button @click="exitRoom">Exit</button>
+    <div class="buttons">
+      <button @click="exitRoom" :disabled="!joined">Exit Room</button>
+      <button @click="startGame" :disabled="!joined">Game Start</button>
     </div>
     <div class="chatSide">
       <div class="chatArea" ref="p">
         <ul class="messages"></ul>
       </div>
-      <input class="inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter" @input="onType"/>
-      <button @click="sendMessage">Send</button>
+      <input class="inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter" @input="onType"
+             :disabled="!joined"/>
+      <button @click="sendMessage" :disabled="!joined">Send</button>
     </div>
   </div>
 </template>
@@ -17,13 +18,23 @@
 <script>
   import $ from 'jquery'
   import { mapState } from 'vuex'
+  import { mapActions } from 'vuex'
 
   const FADE_TIME = 150 // ms
   const TYPING_TIMER_LENGTH = 1000 // ms
   const COLORS = [
-    '#e21400', '#91580f', '#f8a700', '#f78b00',
-    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
-    '#3b88eb', '#3824aa', '#a700ff', '#d300e7',
+    '#e21400',
+    '#91580f',
+    '#f8a700',
+    '#f78b00',
+    '#58dc00',
+    '#287b00',
+    '#a8f07a',
+    '#4ae8c4',
+    '#3b88eb',
+    '#3824aa',
+    '#a700ff',
+    '#d300e7',
   ]
 
   export default {
@@ -33,12 +44,13 @@
         message: '',
         typing: false,
         lastTypingTime: '',
-        stacks: ['li added!', 'li added!'],
       }
     },
     computed: {
       ...mapState({
         nickname: 'nickname',
+        roomID: 'roomID',
+        joined: 'joined',
       }),
     },
     sockets: {
@@ -88,6 +100,9 @@
       reconnect: function () {
         this.log('you have been reconnected')
         if (this.nickname) {
+          this.$socket.emit('register', {
+            nickname: this.nickname,
+          })
           this.$socket.emit('addUser', this.nickname)
         }
       },
@@ -97,12 +112,19 @@
       },
     },
     methods: {
-      joinRoom () {
-      },
+      ...mapActions([
+        'changeRoomID',
+        'changeJoined',
+      ]),
       exitRoom () {
+        this.$socket.emit('exitRoom')
+        this.changeRoomID('')
+        this.changeJoined(false)
+        $('.messages').empty()
+        this.$router.push('/roomlist')
       },
-      test () {
-        this.$socket.emit('test')
+      startGame () {
+        this.$router.push('/game/' + this.roomID)
       },
       addParticipantsMessage (data) {
         let message = ''
@@ -278,5 +300,9 @@
   .chatArea {
     height: 500px;
     background-color: coral;
+  }
+
+  button:disabled, input:disabled {
+    background: #777777;
   }
 </style>
