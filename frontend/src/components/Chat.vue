@@ -201,7 +201,6 @@
         this.changeJoined(false)
         console.log(this.roomOwner)
         $('.messages').empty()
-        this.changeNumUsers(0)
         if (this.roomOwner) {
           this.changeRoomOwner(false)
           this.axios.delete('/api/roomlist/' + this.roomID).then((response) => {
@@ -219,7 +218,7 @@
       },
       startGame () {
         this.axios.put('/api/roomlist/' + this.roomID, {
-          rule: this.selected,
+          rule: this.ruleOption,
           open: false,
         })
           .then((response) => {

@@ -78,6 +78,7 @@
           })
       },
       makeNewRoom () {
+        this.changeNumUsers(0)
         this.axios.post('/api/roomlist', {
           title: this.roomName,
           maker: this.nickname,
@@ -113,6 +114,7 @@
         'changeRoomID',
         'changeJoined',
         'changeRoomOwner',
+        'changeNumUsers',
         'changeDestroyedState',
       ]),
     },
