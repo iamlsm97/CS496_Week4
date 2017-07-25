@@ -4,9 +4,9 @@
       <div class="room">
         <form @submit.prevent="makeNewRoom">
           <div>
-            Make New Room
+            <h3>Make New Room</h3>
           </div>
-          <div>
+          <div class="roomInputArea">
             <input class="form-control" id="roomName" name="roomName" v-model="roomName"
                    placeholder="title of room"/>
           </div>
@@ -15,15 +15,15 @@
       </div>
       <div class="room" v-for="room in rooms">
         <div>
-          <div>title: {{room.title}} </div>
-          <div>maker: {{room.maker}}</div>
-          <div>status: {{room.currentUser}} / {{room.maxUser}}</div>
-          <div>userList:
+          <div class="information">title: {{room.title}} </div>
+          <div class="information">maker: {{room.maker}}</div>
+          <div class="information">status: {{room.currentUser}} / {{room.maxUser}}</div>
+          <div class="information">userList:
             <span v-for="n in room.userList.length" v-if="n != room.userList.length">{{room.userList[n - 1]}}, </span>
             <span v-else>{{room.userList[n - 1]}}</span>
           </div>
         </div>
-        <button class="btn btn-primary" :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
+        <button class="btn btn-primary btn-join" :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
       </div>
     </div>
   </Layout>
@@ -47,6 +47,15 @@
     },
     sockets: {
       loadRoom: function () {
+        this.loadRoom()
+      },
+      login: function () {
+        this.loadRoom()
+      },
+      userJoined: function () {
+        this.loadRoom()
+      },
+      userLeft: function () {
         this.loadRoom()
       },
     },
@@ -74,9 +83,9 @@
           maker: this.nickname,
           open: true,
           maxUser: 4,
-          currentUser: 1,
+          currentUser: 0,
           rule: null,
-          userList: [this.nickname],
+          userList: [],
           turn: 0,
         }).then((response) => {
           console.log('Made new room!')
@@ -88,6 +97,7 @@
           $('#roomName').blur()
         }).catch(function (error) {
           console.log(error)
+          console.log('fuck fuck')
         })
         console.log(this.roomName)
       },
@@ -132,13 +142,35 @@
     overflow-y: auto;
   }
 
+  h3 {
+    margin-top: 10px;
+  }
+
+  .roomInputArea {
+    margin: 20px 0;
+  }
+
+  #roomName {
+    width: 80%;
+    text-align: center;
+    margin: auto;
+  }
+
+  .information {
+    margin: 5px 0;
+  }
+
+  .btn-join {
+    margin: 5px 0;
+  }
+
   .room {
     border: 1px solid;
     border-radius: 10px;
     width: 250px;
     height: 200px;
     margin: 10px;
-    padding: 10px;
+    padding: 20px;
     display: inline-block;
   }
 

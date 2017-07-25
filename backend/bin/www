@@ -68,6 +68,7 @@ let hitHelper = function (socket, roomID, message, room1, pcl) {
   else {
     io.to(roomID).emit(message, {
       player: socket.nickname,
+      userList: room1.userList,
       player0CardList: room1.player0CardList,
       player1CardList: room1.player1CardList,
       player2CardList: room1.player2CardList,
@@ -110,7 +111,20 @@ io.on('connection', function (socket) {
 
     roomID = data.roomID
 
-    // we store the nickname in the socket session for this client
+    Models.Room.findById(roomID, function (err, room) {
+      if (err) {
+        console.log('add user error')
+        socket.emit('addUserError')
+      }
+      else {
+        console.log(room)
+        console.log(room.userList)
+        room.userList.push(socket.nickname)
+        room.currentUser = room.currentUser + 1
+        room.save()
+      }
+    })
+
     if (numUsers[roomID]) {
       ++numUsers[roomID]
     } else {
@@ -128,7 +142,7 @@ io.on('connection', function (socket) {
     })
   })
 
-  socket.on('ruleSelected', function(data) {
+  socket.on('ruleSelected', function (data) {
     console.log('-----socket ruleSelected')
     roomID = data.roomID
     io.to(roomID).emit('ruleSelected', data)
@@ -212,7 +226,7 @@ io.on('connection', function (socket) {
               console.log('correct hit')
               break
             }
-            if(rule === 'Doubles') break
+            if (rule === 'Doubles') break
           case 'Consecutives':
             console.log("Consecutives!")
             if (gcl.length < 2) {
@@ -243,7 +257,7 @@ io.on('connection', function (socket) {
               correct = true
               console.log('correct hit')
             }
-            break;
+            break
         }
         console.log('after switch')
         if (correct && hits[0] == socket.nickname) {
@@ -478,12 +492,24 @@ io.on('connection', function (socket) {
 
     roomID = data.roomID
 
+    Models.Room.findById(roomID, function (err, room) {
+      if (err) {
+        console.log('add user error')
+        socket.emit('addUserError')
+      }
+      else {
+        room.userList.splice(room.userList.indexOf(socket.nickname), 1)
+        room.currentUser = room.currentUser - 1
+        room.save()
+      }
+    })
+
     if (addedUser) {
       --numUsers[roomID]
       addedUser = false
 
       // echo globally that this client has left
-      socket.to(roomID).emit('userLeft', {
+      io.to(roomID).emit('userLeft', {
         nickname: socket.nickname,
         numUsers: numUsers[roomID],
       })
@@ -612,7 +638,7 @@ io.on('connection', function (socket) {
 
         console.log(room.turn)
         room.save(() => {
-          if(room.currentAlive.length === 1) {
+          if (room.currentAlive.length === 1) {
             io.to(roomID).emit('gameOver', {
               player: room.userList[room.turn],
               turn: room.turn,

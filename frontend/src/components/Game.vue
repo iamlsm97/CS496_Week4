@@ -7,19 +7,19 @@
       </div>
       <div class="playerArea">
         <div class="playerCard" :class="{myTurn: turn===0}">
-          <div class="nickname">player0</div>
+          <div class="nickname">{{userList[0]}}</div>
           <div class="cardnum">{{player0CardList.length}}</div>
         </div>
         <div class="playerCard" :class="{myTurn: turn===1}">
-          <div class="nickname">player1</div>
+          <div class="nickname">{{userList[1]}}</div>
           <div class="cardnum">{{player1CardList.length}}</div>
         </div>
         <div class="playerCard" :class="{myTurn: turn===2}">
-          <div class="nickname">player2</div>
+          <div class="nickname">{{userList[2]}}</div>
           <div class="cardnum">{{player2CardList.length}}</div>
         </div>
         <div class="playerCard" :class="{myTurn: turn===3}">
-          <div class="nickname">player3</div>
+          <div class="nickname">{{userList[3]}}</div>
           <div class="cardnum">{{player3CardList.length}}</div>
         </div>
       </div>
@@ -33,6 +33,21 @@
   import { mapActions } from 'vuex'
   import Layout from './Layout'
 
+  const COLORS = [
+    '#e21400',
+    '#91580f',
+    '#f8a700',
+    '#f78b00',
+    '#58dc00',
+    '#287b00',
+    '#a8f07a',
+    '#4ae8c4',
+    '#3b88eb',
+    '#3824aa',
+    '#a700ff',
+    '#d300e7',
+  ]
+
   export default {
     components: {
       Layout,
@@ -42,6 +57,7 @@
         rooms: [],
         selected: null,
         eventListener: false,
+        userList: [],
         player0CardList: [],
         player1CardList: [],
         player2CardList: [],
@@ -78,6 +94,7 @@
         console.log('Could not change turn')
       },
       gameStarted: function (data) {
+        this.userList = data.userList
         this.player0CardList = data.player0CardList
         this.player1CardList = data.player1CardList
         this.player2CardList = data.player2CardList
@@ -91,6 +108,20 @@
         this.player2CardList = data.player2CardList
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
+
+        const $nicknameDiv = $('<span class="nickname"/>')
+          .text(data.player)
+          .css('color', this.getnicknameColor(data.player))
+
+        const $messageBodyDiv = $('<span class="messageBody">')
+          .text(' took cards')
+
+        const $messageDiv = $('<li class="message"/>')
+          .data('nickname', data.nickname)
+          .append($nicknameDiv, $messageBodyDiv)
+
+        $('.messages').append($messageDiv)
+        $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
       hitDraw: function () {
       },
@@ -100,6 +131,20 @@
         this.player2CardList = data.player2CardList
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
+
+        const $nicknameDiv = $('<span class="nickname"/>')
+          .text(data.player)
+          .css('color', this.getnicknameColor(data.player))
+
+        const $messageBodyDiv = $('<span class="messageBody">')
+          .text(' did mistake')
+
+        const $messageDiv = $('<li class="message"/>')
+          .data('nickname', data.nickname)
+          .append($nicknameDiv, $messageBodyDiv)
+
+        $('.messages').append($messageDiv)
+        $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
       userDead: function (data) {
         console.log('you lost')
@@ -112,7 +157,20 @@
           console.log('game disabled')
           this.eventListener = false
         }
-        $('.messages').append('<li>' + data.player + ' is dead</li>')
+
+        const $nicknameDiv = $('<span class="nickname"/>')
+          .text(data.player)
+          .css('color', this.getnicknameColor(data.player))
+
+        const $messageBodyDiv = $('<span class="messageBody">')
+          .text(' is dead')
+
+        const $messageDiv = $('<li class="message"/>')
+          .data('nickname', data.nickname)
+          .append($nicknameDiv, $messageBodyDiv)
+
+        $('.messages').append($messageDiv)
+        $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
       gameOver: function (data) {
         console.log('game over')
@@ -123,7 +181,19 @@
         this.gameCardList = data.gameCardList
         console.log('game disabled')
         this.eventListener = false
-        $('.messages').append('<li>' + data.player + ' win the game!</li>')
+
+        const $nicknameDiv = $('<span class="nickname"/>')
+          .text(data.player)
+          .css('color', this.getnicknameColor(data.player))
+
+        const $messageBodyDiv = $('<span class="messageBody">')
+          .text(' win the game!')
+
+        const $messageDiv = $('<li class="message"/>')
+          .append($nicknameDiv, $messageBodyDiv)
+
+        $('.messages').append($($messageDiv))
+        $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
       turnChange: function (data) {
         console.log(data)
@@ -158,10 +228,20 @@
       ]),
       playCard () {
         if (this.eventListener) {
-//          if () {
-          this.$socket.emit('playCard')
-//          }
+          if (this.turn === this.userList.indexOf(this.nickname)) {
+            this.$socket.emit('playCard')
+          }
         }
+      },
+      getnicknameColor (nickname) {
+        // Compute hash code
+        let hash = 7
+        for (let i = 0; i < nickname.length; i++) {
+          hash = nickname.charCodeAt(i) + (hash << 5) - hash
+        }
+        // Calculate color
+        const index = Math.abs(hash % COLORS.length)
+        return COLORS[index]
       },
     },
     created () {

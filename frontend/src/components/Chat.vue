@@ -95,6 +95,7 @@
       // Whenever the server emits 'login', log the login message
       login: function (data) {
         this.connected = true
+        $('.messages').empty()
         // Display the welcome message
         const message = 'Welcome to ERS+ Chat – '
         this.log(message, {
@@ -276,18 +277,25 @@
           $typingMessages.remove()
         }
 
-        const $nicknameDiv = $('<span class="nickname"/>')
+        const $nicknameDiv = $('<div class="nickname"/>')
           .text(data.nickname)
           .css('color', this.getnicknameColor(data.nickname))
+          .css('margin-top', '8px')
+          .css('margin-bottom', '5px')
+          .css('display', 'block')
 
         const $messageBodyDiv = $('<span class="messageBody">')
           .text(data.message)
+          .css('background-color', '#E0EDFF')
+          .css('border-radius', '5px')
+          .css('padding', '5px 12px')
 
         const typingClass = data.typing ? 'typing' : ''
         const $messageDiv = $('<li class="message"/>')
           .data('nickname', data.nickname)
           .addClass(typingClass)
           .append($nicknameDiv, $messageBodyDiv)
+          .css('text-align', 'left')
 
         this.addMessageElement($messageDiv, options)
       },
@@ -401,8 +409,6 @@
   .chatArea {
     border: 1px solid;
     border-radius: 10px;
-    background-color: #eeeeee;
-
   }
 
   .buttons {
