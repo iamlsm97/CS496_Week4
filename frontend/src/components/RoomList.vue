@@ -5,7 +5,13 @@
         <div>
           Make New Room
         </div>
-        <button class="btn btn-primary" @click="">Make New Room</button>
+        <form @submit.prevent="makeNewRoom">
+          <div>
+            <input class="form-control" id="roomName" name="roomName" v-model="roomName"
+                   placeholder="title of room"/>
+          </div>
+          <button class="btn btn-primary" :disabled="roomName.length === 0">Make New Room</button>
+        </form>
       </div>
       <div class="room" v-for="room in rooms">
         <div>
@@ -34,6 +40,7 @@
     },
     data () {
       return {
+        roomName: '',
         rooms: [],
       }
     },
@@ -45,6 +52,9 @@
       }),
     },
     methods: {
+      makeNewRoom () {
+        console.log(this.roomName)
+      },
       joinRoom (roomID) {
         console.log(roomID)
         this.changeRoomID(roomID)
