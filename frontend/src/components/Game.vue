@@ -57,6 +57,31 @@
         this.player2CardList = data.player2CardList
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
+
+        window.addEventListener('keydown', function (event) {
+          if (event.keyCode === 32) {
+            this.$socket.emit('hit', {
+              roomID: this.roomID,
+            })
+            console.log('game enabled!')
+          }
+        }.bind(this))
+      },
+      hitWin: function (data) {
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
+      },
+      hitDraw: function () {
+      },
+      hitLoss: function (data) {
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
       },
     },
     methods: {
