@@ -61,8 +61,14 @@
             text: 'Consecutives',
             value: 'Consecutives',
           }, {
-            text: 'Both',
-            value: 'Both',
+            text: 'Doubles and Consecutives',
+            value: 'DC',
+          }, {
+            text: 'Sandwiches',
+            value: 'Sandwiches',
+          }, {
+            text: 'All',
+            value: 'All',
           },
         ],
       }

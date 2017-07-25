@@ -11,6 +11,9 @@ const store = {
     roomID: '',
     joined: false,
     turn: 0,
+    roomOwner: false,
+    numUsers: 0,
+    destroyedState: false,
   },
   mutations: {
     changeNickname (state, nickname) {
@@ -26,6 +29,15 @@ const store = {
     },
     changeTurn (state, turn) {
       state.turn = turn
+    },
+    changeRoomOwner (state, roomOwner) {
+      state.roomOwner = roomOwner
+    },
+    changeNumUsers (state, numUsers) {
+      state.numUsers = numUsers
+    },
+    changeDestroyedState (state, destroyedState) {
+      state.destroyedState = destroyedState
     },
     setLoading (state, loading) {
       state.loading = loading
@@ -43,6 +55,15 @@ const store = {
     },
     changeTurn ({ commit }, turn) {
       commit('changeTurn', turn)
+    },
+    changeRoomOwner ({ commit }, roomOwner) {
+      commit('changeRoomOwner', roomOwner)
+    },
+    changeNumUsers ({ commit }, numUsers) {
+      commit('changeNumUsers', numUsers)
+    },
+    changeDestroyedState ({ commit }, destroyedState) {
+      commit('changeDestroyedState', destroyedState)
     },
     setLoading ({ commit }, loading) {
       commit('setLoading', loading)

@@ -10,7 +10,7 @@
             <input class="form-control" id="roomName" name="roomName" v-model="roomName"
                    placeholder="title of room"/>
           </div>
-          <button class="btn btn-primary" :disabled="roomName.length === 0">Make New Room</button>
+          <button class="btn btn-primary" :disabled="roomName.length === 0 || !!joined">Make New Room</button>
         </form>
       </div>
       <div class="room" v-for="room in rooms">
@@ -33,6 +33,7 @@
   import Layout from './Layout'
   import { mapState } from 'vuex'
   import { mapActions } from 'vuex'
+  import $ from 'jquery'
 
   export default {
     components: {
@@ -49,10 +50,29 @@
         nickname: 'nickname',
         roomID: 'roomID',
         joined: 'joined',
+        destroyedState: 'destroyedState',
       }),
     },
     methods: {
       makeNewRoom () {
+        this.axios.post('/api/roomlist', {
+          title: this.roomName,
+          maker: this.nickname,
+          open: true,
+          maxUser: 4,
+          currentUser: 1,
+          rule: null,
+          userList: [this.nickname],
+          turn: 0,
+        }).then((response) => {
+          console.log('Made new room!')
+          this.changeRoomOwner(true)
+          console.log(response.data._id)
+          this.joinRoom(response.data._id)
+        })
+          .catch(function (error) {
+            console.log(error)
+          })
         console.log(this.roomName)
       },
       joinRoom (roomID) {
@@ -66,6 +86,8 @@
       ...mapActions([
         'changeRoomID',
         'changeJoined',
+        'changeRoomOwner',
+        'changeDestroyedState',
       ]),
     },
     created () {
@@ -76,6 +98,19 @@
         .catch(function (error) {
           console.log(error)
         })
+      console.log(this.destroyedState)
+      if (this.destroyedState) {
+        $('.messages').append('<li>Room owner destroyed the room.</li>')
+        this.changeDestroyedState(false)
+      }
+    },
+    mounted () {
+      if (this.destroyedState) {
+        $('.messages').append('<li>Room owner destroyed the room.</li>')
+        $('.messages').append('<li>Game Start!</li>')
+        this.log('Room owner destroyed the room.')
+        this.changeDestroyedState(false)
+      }
     },
   }
 </script>

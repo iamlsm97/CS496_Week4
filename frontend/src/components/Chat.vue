@@ -2,7 +2,7 @@
   <div class="chat">
     <div class="buttons">
       <button class="btn btn-primary" @click="exitRoom" :disabled="!joined">Exit Room</button>
-      <button class="btn btn-primary" @click="startGame" :disabled="!joined">Game Start</button>
+      <button class="btn btn-primary" @click="startGame" :disabled="!joined || numUsers != 3">Game Start</button>
       <b-input-group left="Rule">
         <b-form-select v-model="selected" :options="options" @change.native="optionSelected" class="mb-3">
         </b-form-select>
@@ -57,7 +57,6 @@
           {
             text: 'Select a rule',
             value: null,
-            disabled: true,
           }, {
             text: 'Doubles',
             value: 'Doubles',
@@ -65,8 +64,14 @@
             text: 'Consecutives',
             value: 'Consecutives',
           }, {
-            text: 'Both',
-            value: 'Both',
+            text: 'Doubles and Consecutives',
+            value: 'DC',
+          }, {
+            text: 'Sandwiches',
+            value: 'Sandwiches',
+          }, {
+            text: 'All',
+            value: 'All',
           },
         ],
       }
@@ -76,6 +81,9 @@
         nickname: 'nickname',
         roomID: 'roomID',
         joined: 'joined',
+        roomOwner: 'roomOwner',
+        numUsers: 'numUsers',
+        destroyedState: 'destroyedState',
       }),
     },
     sockets: {
@@ -90,6 +98,16 @@
         this.addParticipantsMessage(data)
       },
 
+      moveToGame: function () {
+        console.log(this.roomOwner)
+        if (this.roomOwner) {
+          this.$socket.emit('gameStart', {
+            roomID: this.roomID,
+          })
+        }
+        this.$router.push('/game/' + this.roomID)
+      },
+
       // Whenever the server emits 'new message', update the chat body
       newMessage: function (data) {
         this.addChatMessage(data)
@@ -99,6 +117,8 @@
       userJoined: function (data) {
         this.log(data.nickname + ' joined')
         this.addParticipantsMessage(data)
+        this.changeNumUsers(this.numUsers + 1)
+        console.log(this.numUsers)
       },
 
       // Whenever the server emits 'user left', log it in the chat body
@@ -106,8 +126,23 @@
         this.log(data.nickname + ' left')
         this.addParticipantsMessage(data)
         this.removeChatTyping(data)
+        this.changeNumUsers(this.numUsers - 1)
+        console.log(this.numUsers)
       },
-
+      // if room destroyed
+      roomDestroyed: function () {
+        this.changeJoined(false)
+        this.changeRoomID('')
+        this.changeNumUsers(0)
+        this.$socket.emit('exitRoom', {
+          roomOwner: false,
+          roomID: this.roomID,
+        })
+        this.changeDestroyedState(true)
+        this.log('Room destroyed')
+        console.log('destroyedState: ' + this.destroyedState)
+        this.$router.push('/roomlist')
+      },
       // Whenever the server emits 'typing', show the typing message
       typing: function (data) {
         this.addChatTyping(data)
@@ -144,12 +179,29 @@
       ...mapActions([
         'changeRoomID',
         'changeJoined',
+        'changeNumUsers',
+        'changeRoomOwner',
+        'changeDestroyedState',
       ]),
       exitRoom () {
-        this.$socket.emit('exitRoom')
-        this.changeRoomID('')
+        this.$socket.emit('exitRoom', {
+          roomOwner: this.roomOwner,
+          roomID: this.roomID,
+        })
         this.changeJoined(false)
+        console.log(this.roomOwner)
         $('.messages').empty()
+        this.changeNumUsers(0)
+        if (this.roomOwner) {
+          this.changeRoomOwner(false)
+          this.axios.delete('/api/roomlist/' + this.roomID).then((response) => {
+            console.log('room deleted')
+          })
+            .catch(function (error) {
+              console.log(error)
+            })
+        }
+        this.changeRoomID('')
         this.$router.push('/roomlist')
       },
       optionSelected (event) {
@@ -158,6 +210,7 @@
       startGame () {
         this.axios.put('/api/roomlist/' + this.roomID, {
           rule: this.selected,
+          open: false,
         })
           .then((response) => {
             console.log('Success!')
@@ -165,10 +218,9 @@
           .catch(function (error) {
             console.log(error)
           })
-        this.$socket.emit('gameStart', {
+        this.$socket.emit('gS', {
           roomID: this.roomID,
         })
-        this.$router.push('/game/' + this.roomID)
       },
       addParticipantsMessage (data) {
         let message = ''

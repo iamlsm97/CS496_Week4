@@ -126,9 +126,14 @@ io.on('connection', function (socket) {
 
   socket.on('ruleSelected', function(data) {
     console.log('-----socket ruleSelected')
+    roomID = data.roomID
     io.to(roomID).emit('ruleSelected', data)
   })
 
+  socket.on('gS', function (data) {
+    roomID = data.roomID
+    io.to(roomID).emit('moveToGame')
+  })
   // when the client emits 'game start', this listens and executes
   socket.on('gameStart', function (data) {
     console.log("-----splitting cards")
@@ -186,6 +191,8 @@ io.on('connection', function (socket) {
         let rule = room.rule
         let gcl = room.gameCardList
         switch (rule) {
+          case 'All':
+          case 'DC':
           case 'Doubles':
             console.log("Doubles!")
             if (gcl.length < 2) {
@@ -199,8 +206,9 @@ io.on('connection', function (socket) {
             else {
               correct = true
               console.log('correct hit')
+              break
             }
-            break
+            if(rule === 'Doubles') break
           case 'Consecutives':
             console.log("Consecutives!")
             if (gcl.length < 2) {
@@ -214,8 +222,24 @@ io.on('connection', function (socket) {
             else {
               correct = true
               console.log('correct hit')
+              break
             }
-            break
+            if (rule === 'Consecutives' || rule === 'DC') break
+          case 'Sandwiches':
+            console.log("Sandwiches!")
+            if (gcl.length < 3) {
+              correct = false
+              console.log("wrong hit")
+            }
+            else if ((gcl[gcl.length - 1] % 13) != (gcl[gcl.length - 3] % 13)) {
+              correct = false
+              console.log('wrong hit')
+            }
+            else {
+              correct = true
+              console.log('correct hit')
+            }
+            break;
         }
         console.log('after switch')
         if (correct && hits[0] == socket.nickname) {
@@ -445,8 +469,11 @@ io.on('connection', function (socket) {
     })
   })
 
-  socket.on('exitRoom', () => {
+  socket.on('exitRoom', (data) => {
     console.log("-----socket exitRoom")
+
+    roomID = data.roomID
+
     if (addedUser) {
       --numUsers[roomID]
       addedUser = false
@@ -457,8 +484,12 @@ io.on('connection', function (socket) {
         numUsers: numUsers[roomID],
       })
     }
-
     socket.leave(roomID)
+    console.log(data.roomOwner)
+    if (data.roomOwner) {
+      console.log("-----socket roomDestroyed")
+      io.to(roomID).emit('roomDestroyed')
+    }
   })
 
   // when the user disconnects.. perform this
