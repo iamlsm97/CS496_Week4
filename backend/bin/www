@@ -54,7 +54,7 @@ let hitHelper = function (socket, roomID, message, room1, pcl) {
       player3CardList: room1.player3CardList,
       gameCardList: room1.gameCardList,
     })
-    if (room1.currentAlive === 1) {
+    if (room1.currentAlive.length === 1) {
       io.to(roomID).emit('gameOver', {
         player: room1.userList[room1.currentAlive[0]],
         player0CardList: room1.player0CardList,
@@ -146,6 +146,8 @@ io.on('connection', function (socket) {
       player1CardList: cards.slice(13, 26),
       player2CardList: cards.slice(26, 39),
       player3CardList: cards.slice(39, 52),
+      gameCardList: [],
+      currentAlive: [0, 1, 2, 3],
     }, { new: true }, function (err, room) {
       if (err) {
         console.log('card splitting error')
@@ -472,11 +474,96 @@ io.on('connection', function (socket) {
 
   })
 
-  socket.on('turnChange', (turn) => {
-    console.log('-----socket turnChange')
+  socket.on('playCard', () => {
+    console.log('-----socket playCard')
     // change turn info of DB
-    turn = (turn + 1) % 4
-    io.to(roomID).emit('turnChange', turn)
+    Models.Room.findById(roomID, function (err, room) {
+      if (err) {
+        console.log('turn change error')
+        socket.emit('turnChangeError')
+      }
+      else {
+        // move card to gameCardList
+        const preTurn = room.turn
+        let play
+        switch (room.turn) {
+          case 0:
+            play = room.player0CardList.shift()
+            break
+          case 1:
+            play = room.player1CardList.shift()
+            break
+          case 2:
+            play = room.player2CardList.shift()
+            break
+          case 3:
+            play = room.player3CardList.shift()
+            break
+          default:
+            break
+        }
+        room.gameCardList.push(play)
+
+        console.log(room.turn)
+        console.log(room.currentAlive)
+
+        currentIndex = room.currentAlive.indexOf(room.turn)
+        nextIndex = (currentIndex + 1) % room.currentAlive.length
+        console.log(currentIndex)
+        console.log(nextIndex)
+        room.turn = room.currentAlive[nextIndex]
+
+        switch (preTurn) {
+          case 0:
+            if (room.player0CardList.length === 0) {
+              room.currentAlive.splice(currentIndex, 1)
+            }
+            break
+          case 1:
+            if (room.player1CardList.length === 0) {
+              room.currentAlive.splice(currentIndex, 1)
+            }
+            break
+          case 2:
+            if (room.player2CardList.length === 0) {
+              room.currentAlive.splice(currentIndex, 1)
+            }
+            break
+          case 3:
+            if (room.player3CardList.length === 0) {
+              room.currentAlive.splice(currentIndex, 1)
+            }
+            break
+          default:
+            break
+        }
+
+        console.log(room.turn)
+        room.save(() => {
+          if(room.currentAlive.length === 1) {
+            io.to(roomID).emit('gameOver', {
+              player: room.userList[room.turn],
+              turn: room.turn,
+              player0CardList: room.player0CardList,
+              player1CardList: room.player1CardList,
+              player2CardList: room.player2CardList,
+              player3CardList: room.player3CardList,
+              gameCardList: room.gameCardList,
+            })
+          } else {
+            io.to(roomID).emit('turnChange', {
+              turn: room.turn,
+              player0CardList: room.player0CardList,
+              player1CardList: room.player1CardList,
+              player2CardList: room.player2CardList,
+              player3CardList: room.player3CardList,
+              gameCardList: room.gameCardList,
+            })
+            console.log('success')
+          }
+        })
+      }
+    })
   })
 
 })

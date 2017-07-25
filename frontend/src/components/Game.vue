@@ -3,7 +3,7 @@
     <div class="gameArea" @click="playCard">
       Main Game Area
       <div class="deckArea">
-        <div class="deckCard"></div>
+        <div class="deckCard">deck</div>
       </div>
       <div class="playerArea">
         <div class="playerCard" :class="{myTurn: turn===0}">player0</div>
@@ -62,6 +62,9 @@
       startError: function () {
         console.log('Could not start')
       },
+      turnChangeError: () => {
+        console.log('Could not change turn')
+      },
       gameStarted: function (data) {
         this.player0CardList = data.player0CardList
         this.player1CardList = data.player1CardList
@@ -108,8 +111,14 @@
         console.log('game disabled')
         this.eventListener = false
       },
-      turnChange: function (turn) {
-        this.changeTurn(turn)
+      turnChange: function (data) {
+        console.log(data)
+        this.changeTurn(data.turn)
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
       },
     },
     computed: {
@@ -124,7 +133,9 @@
         'changeTurn',
       ]),
       playCard () {
-        this.$socket.emit('turnChange', this.turn)
+        if (this.eventListener) {
+          this.$socket.emit('playCard')
+        }
       },
       gameStart: function () {
         this.axios.put('/api/roomlist/' + this.roomID, {
