@@ -45,6 +45,9 @@
           }, {
             text: 'Consecutives',
             value: 'Consecutives',
+          }, {
+            text: 'Both',
+            value: 'Both',
           }],
       }
     },
@@ -76,8 +79,8 @@
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
       },
-      gameOver: function (data) {
-        console.log('game over')
+      userDead: function (data) {
+        console.log('you lost')
         this.player0CardList = data.player0CardList
         this.player1CardList = data.player1CardList
         this.player2CardList = data.player2CardList
@@ -87,6 +90,16 @@
           console.log('game disabled')
           this.eventListener = false
         }
+      },
+      gameOver: function (data) {
+        console.log('game over')
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
+        console.log('game disabled')
+        this.eventListener = false
       },
     },
     methods: {

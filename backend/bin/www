@@ -46,7 +46,7 @@ let hits = []
 let hitHelper = function (socket, roomID, message, room1, pcl) {
   console.log(room1)
   if (pcl.length === 0) {
-    io.to(roomID).emit('gameOver', {
+    io.to(roomID).emit('userDead', {
       player: socket.nickname,
       player0CardList: room1.player0CardList,
       player1CardList: room1.player1CardList,
@@ -54,6 +54,16 @@ let hitHelper = function (socket, roomID, message, room1, pcl) {
       player3CardList: room1.player3CardList,
       gameCardList: room1.gameCardList,
     })
+    if (room1.currentAlive === 1) {
+      io.to(roomID).emit('gameOver', {
+        player: room1.userList[room1.currentAlive[0]],
+        player0CardList: room1.player0CardList,
+        player1CardList: room1.player1CardList,
+        player2CardList: room1.player2CardList,
+        player3CardList: room1.player3CardList,
+        gameCardList: room1.gameCardList,
+      })
+    }
   }
   else {
     io.to(roomID).emit(message, {
@@ -130,7 +140,10 @@ io.on('connection', function (socket) {
       cards[i-1] = temp
     }
 
-    Models.Room.findByIdAndUpdate(roomID, {player0CardList: cards.slice(0,13), player1CardList: cards.slice(13,26), player2CardList: cards.slice(26,39), player3CardList: cards.slice(39,52), gameCardList: []}, {new: true}, function(err, room) {
+    Models.Room.findByIdAndUpdate(roomID,
+      {player0CardList: cards.slice(0,13), player1CardList: cards.slice(13,26), player2CardList: cards.slice(26,39), player3CardList: cards.slice(39,52), gameCardList: [], currentAlive: [0,1,2,3]},
+      {new: true},
+      function(err, room) {
       if (err) {
         console.log('card splitting error')
         socket.emit('startError')
@@ -178,6 +191,19 @@ io.on('connection', function (socket) {
             }
             break;
           case 'Consecutives':
+            console.log("Consecutives!")
+            if (gcl.length < 2) {
+              correct = false
+              console.log("wrong hit")
+            }
+            else if ((gcl[gcl.length - 1] % 13) != ((gcl[gcl.length - 2] - 1) % 13) || (gcl[gcl.length - 1] % 13) != ((gcl[gcl.length - 2] + 1) % 13)) {
+              correct = false
+              console.log('wrong hit')
+            }
+            else {
+              correct = true
+              console.log('correct hit')
+            }
             break;
         }
         console.log('after switch')
@@ -243,53 +269,107 @@ io.on('connection', function (socket) {
             }
           }
           let pcl = []
+          let cal = []
           switch (idx) {
             case 0:
               gcl.unshift(room.player0CardList[0])
               pcl = room.player0CardList.slice()
               pcl.shift()
-              Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player0CardList: pcl}, {new: true}, function(err, room1) {
-                if (err) console.log("update loser0 error")
-                else {
-                  console.log("update loser0")
-                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
-                }
-              })
+              cal = room.currentAlive.slice()
+              cal.shift()
+              if (pcl.length === 0) {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player0CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser0 error")
+                  else {
+                    console.log("update loser0")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
+              else {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player0CardList: pcl}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser0 error")
+                  else {
+                    console.log("update loser0")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
+              break
             case 1:
               gcl.unshift(room.player1CardList[0])
               pcl = room.player1CardList.slice()
               pcl.shift()
-              Models.Room.findByIdAndUpdate(roomID, {player1CardList: pcl, gameCardList: gcl}, {new: true}, function(err, room1) {
-                if (err) console.log("update loser1 error")
-                else {
-                  console.log("update loser1")
-                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
-                }
-              })
+              cal = room.currentAlive.slice()
+              cal.splice(1, 1)
+              if (pcl.length === 0) {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player1CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser1 error")
+                  else {
+                    console.log("update loser1")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
+              else {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player1CardList: pcl}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser1 error")
+                  else {
+                    console.log("update loser1")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
               break
             case 2:
               gcl.unshift(room.player2CardList[0])
               pcl = room.player2CardList.slice()
               pcl.shift()
-              Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player2CardList: pcl}, {new: true}, function(err, room1) {
-                if (err) console.log("update loser2 error")
-                else {
-                  console.log("update loser2")
-                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
-                }
-              })
+              cal = room.currentAlive.slice()
+              cal.splice(2, 1)
+              if (pcl.length === 0) {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player2CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser2 error")
+                  else {
+                    console.log("update loser2")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
+              else {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player2CardList: pcl}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser2 error")
+                  else {
+                    console.log("update loser2")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
               break
             case 3:
               gcl.unshift(room.player3CardList[0])
               pcl = room.player3CardList.slice()
               pcl.shift()
-              Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player3CardList: pcl}, {new: true}, function(err, room1) {
-                if (err) console.log("update loser3 error")
-                else {
-                  console.log("update loser3")
-                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
-                }
-              })
+              cal = room.currentAlive.slice()
+              cal.pop()
+              if (pcl.length === 0) {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player3CardList: pcl, currentAlive: cal}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser3 error")
+                  else {
+                    console.log("update loser3")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
+              else {
+                Models.Room.findByIdAndUpdate(roomID, {gameCardList: gcl, player3CardList: pcl}, {new: true}, function(err, room1) {
+                  if (err) console.log("update loser3 error")
+                  else {
+                    console.log("update loser3")
+                    hitHelper(socket, roomID, 'hitLoss', room1, pcl)
+                  }
+                })
+              }
               break
           }
           hits = []

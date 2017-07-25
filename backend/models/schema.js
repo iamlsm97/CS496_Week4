@@ -19,6 +19,7 @@ var roomSchema = new Schema({
   player3CardList: Array,
   turn: Number,
   rule: String,
+  currentAlive: Array,
 }, {versionKey: false})
 
 module.exports = {
