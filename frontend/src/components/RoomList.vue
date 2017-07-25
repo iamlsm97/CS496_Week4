@@ -118,19 +118,6 @@
     },
     created () {
       this.loadRoom()
-      console.log(this.destroyedState)
-      if (this.destroyedState) {
-        $('.messages').append('<li>Room owner destroyed the room.</li>')
-        this.changeDestroyedState(false)
-      }
-    },
-    mounted () {
-      if (this.destroyedState) {
-        $('.messages').append('<li>Room owner destroyed the room.</li>')
-        $('.messages').append('<li>Game Start!</li>')
-        this.log('Room owner destroyed the room.')
-        this.changeDestroyedState(false)
-      }
     },
   }
 </script>

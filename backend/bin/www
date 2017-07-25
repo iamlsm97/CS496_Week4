@@ -132,8 +132,15 @@ io.on('connection', function (socket) {
     }
     addedUser = true
     socket.join(roomID)
-    socket.emit('login', {
-      numUsers: numUsers[roomID],
+    Models.Room.findById(roomID, function (err, room) {
+      if (err) {
+        console.log('add user error')
+      }
+      console.log('Selected :' + room.rule)
+      socket.emit('login', {
+        numUsers: numUsers[roomID],
+        rule: room.rule,
+      })
     })
     // echo globally (all clients) that a person has connected
     socket.broadcast.to(roomID).emit('userJoined', {
@@ -144,7 +151,9 @@ io.on('connection', function (socket) {
 
   socket.on('ruleSelected', function (data) {
     console.log('-----socket ruleSelected')
-    roomID = data.roomID
+    Models.Room.findByIdAndUpdate(roomID, { rule: data }, {new: true}, function(err, room) {
+      if (err) console.log(err)
+    })
     io.to(roomID).emit('ruleSelected', data)
   })
 
@@ -210,7 +219,7 @@ io.on('connection', function (socket) {
         let gcl = room.gameCardList
         switch (rule) {
           case 'All':
-          case 'DC':
+          case 'D & C':
           case 'Doubles':
             console.log("Doubles!")
             if (gcl.length < 2) {

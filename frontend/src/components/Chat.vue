@@ -1,14 +1,16 @@
 <template>
   <div class="chat">
     <div class="buttons">
+
       <button class="btn btn-primary btn-buttons" @click="exitRoom" :disabled="!joined">Exit Room</button>
-      <button class="btn btn-primary btn-buttons" @click="startGame" :disabled="!joined || numUsers != 3">Game Start
-      </button>
-      <b-input-group left="Rule">
-        <b-form-select v-model="selected" :options="options" @change.native="optionSelected" class="mb-3">
-        </b-form-select>
-      </b-input-group>
-      <div>
+      <button class="btn btn-primary btn-buttons" @click="startGame" :disabled="!joined || numUsers != 3 || ruleOption == null">Game Start</button>
+      <div v-if="roomOwner">
+        <b-input-group left="Rule">
+          <b-form-select v-model="selected" :options="options" @change.native="optionSelected" class="mb-3">
+          </b-form-select>
+        </b-input-group>
+      </div>
+      <div v-else>
         Rule: <strong>{{ ruleOption }}</strong>
       </div>
     </div>
@@ -62,6 +64,7 @@
           {
             text: 'Select a rule',
             value: null,
+            disabled: true,
           }, {
             text: 'Doubles',
             value: 'Doubles',
@@ -70,7 +73,7 @@
             value: 'Consecutives',
           }, {
             text: 'Doubles and Consecutives',
-            value: 'DC',
+            value: 'D & C',
           }, {
             text: 'Sandwiches',
             value: 'Sandwiches',
@@ -94,8 +97,10 @@
     sockets: {
       // Whenever the server emits 'login', log the login message
       login: function (data) {
+        console.log(data)
         this.connected = true
         $('.messages').empty()
+        this.ruleOption = data.rule
         // Display the welcome message
         const message = 'Welcome to ERS+ Chat – '
         this.log(message, {
@@ -145,7 +150,6 @@
           roomID: this.roomID,
         })
         this.changeDestroyedState(true)
-        this.log('Room destroyed')
         console.log('destroyedState: ' + this.destroyedState)
         this.$router.push('/roomlist')
       },
