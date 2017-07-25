@@ -1,6 +1,12 @@
 <template>
   <Layout>
     <div class="roomlist">
+      <div class="room">
+        <div>
+          Make New Room
+        </div>
+        <button class="btn btn-primary" @click="">Make New Room</button>
+      </div>
       <div class="room" v-for="room in rooms">
         <div>
           <div>title: {{room.title}} </div>
@@ -69,9 +75,11 @@
     height: 90vh;
     padding: 3vh;
     overflow-y: auto;
+    display: inline-block;
   }
 
   .room {
+    height: 30vh;
     border: 1px solid;
     border-radius: 10px;
     width: 30%;
