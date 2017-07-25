@@ -43,9 +43,10 @@ let numUsers = {}
 // let numUsers = 0
 let hits = []
 
-let hitHelper = function (socket, roomID, message, room1) {
+let hitHelper = function (socket, roomID, message, room1, pcl) {
   console.log(room1)
-  io.to(roomID).emit(message, {
+  if (pcl.length === 0) {
+    io.to(roomID).emit('gameOver', {
       player: socket.nickname,
       player0CardList: room1.player0CardList,
       player1CardList: room1.player1CardList,
@@ -53,6 +54,17 @@ let hitHelper = function (socket, roomID, message, room1) {
       player3CardList: room1.player3CardList,
       gameCardList: room1.gameCardList,
     })
+  }
+  else {
+    io.to(roomID).emit(message, {
+      player: socket.nickname,
+      player0CardList: room1.player0CardList,
+      player1CardList: room1.player1CardList,
+      player2CardList: room1.player2CardList,
+      player3CardList: room1.player3CardList,
+      gameCardList: room1.gameCardList,
+    })
+  }
 }
 
 io.on('connection', function (socket) {
@@ -125,7 +137,7 @@ io.on('connection', function (socket) {
       }
       else {
         console.log('success')
-        hitHelper(socket, roomID,'gameStarted', room)
+        hitHelper(socket, roomID,'gameStarted', room, [1])
       }
     })
   })
@@ -184,7 +196,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update winner0 error")
                 else {
                   console.log('update winner0!')
-                  hitHelper(socket, roomID, 'hitWin', room1)
+                  hitHelper(socket, roomID, 'hitWin', room1, [1])
                 }
               })
               break
@@ -193,7 +205,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update winner1 error")
                 else {
                   console.log('update winner1!')
-                  hitHelper(socket, roomID, 'hitWin', room1)
+                  hitHelper(socket, roomID, 'hitWin', room1, [1])
                 }
               })
               break
@@ -202,7 +214,7 @@ io.on('connection', function (socket) {
                   if (err) console.log("update winner2 error")
                   else {
                     console.log('update winner2!')
-                    hitHelper(socket, roomID, 'hitWin', room1)
+                    hitHelper(socket, roomID, 'hitWin', room1, [1])
                   }
                 })
               break
@@ -211,7 +223,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update winner3 error")
                 else {
                   console.log('update winner3!')
-                  hitHelper(socket, roomID, 'hitWin', room1)
+                  hitHelper(socket, roomID, 'hitWin', room1, [1])
                 }
               })
               break
@@ -240,7 +252,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update loser0 error")
                 else {
                   console.log("update loser0")
-                  hitHelper(socket, roomID, 'hitLoss', room1)
+                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
                 }
               })
             case 1:
@@ -251,7 +263,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update loser1 error")
                 else {
                   console.log("update loser1")
-                  hitHelper(socket, roomID, 'hitLoss', room1)
+                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
                 }
               })
               break
@@ -263,7 +275,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update loser2 error")
                 else {
                   console.log("update loser2")
-                  hitHelper(socket, roomID, 'hitLoss', room1)
+                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
                 }
               })
               break
@@ -275,7 +287,7 @@ io.on('connection', function (socket) {
                 if (err) console.log("update loser3 error")
                 else {
                   console.log("update loser3")
-                  hitHelper(socket, roomID, 'hitLoss', room1)
+                  hitHelper(socket, roomID, 'hitLoss', room1, pcl)
                 }
               })
               break

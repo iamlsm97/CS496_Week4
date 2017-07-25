@@ -29,6 +29,7 @@
       return {
         rooms: [],
         selected: null,
+        eventListener: false,
         player0CardList: [],
         player1CardList: [],
         player2CardList: [],
@@ -57,15 +58,7 @@
         this.player2CardList = data.player2CardList
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
-
-        window.addEventListener('keydown', function (event) {
-          if (event.keyCode === 32) {
-            this.$socket.emit('hit', {
-              roomID: this.roomID,
-            })
-            console.log('game enabled!')
-          }
-        }.bind(this))
+        this.eventListener = true
       },
       hitWin: function (data) {
         this.player0CardList = data.player0CardList
@@ -82,6 +75,18 @@
         this.player2CardList = data.player2CardList
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
+      },
+      gameOver: function (data) {
+        console.log('game over')
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
+        if (data.player === this.nickname) {
+          console.log('game disabled')
+          this.eventListener = false
+        }
       },
     },
     methods: {
@@ -101,9 +106,14 @@
       },
     },
     created () {
-      /* window.addEventListener('keyup', function (event) {
-        alert('Hello world')
-      }) */
+      window.addEventListener('keyup', function (event) {
+        if (event.keyCode === 32 && this.eventListener) {
+          this.$socket.emit('hit', {
+            roomID: this.roomID,
+          })
+          console.log('game enabled!')
+        }
+      }.bind(this))
     },
     computed: {
       ...mapState({
