@@ -88,6 +88,10 @@ io.on('connection', function (socket) {
     socket.nickname = data.nickname
   })
 
+  socket.on('makeNewRoom', () => {
+    io.emit('loadRoom')
+  })
+
   // when the client emits 'new message', this listens and executes
   socket.on('newMessage', function (data) {
     // we tell the client to execute 'new message'

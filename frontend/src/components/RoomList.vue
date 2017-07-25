@@ -2,10 +2,10 @@
   <Layout>
     <div class="roomlist">
       <div class="room">
-        <div>
-          Make New Room
-        </div>
         <form @submit.prevent="makeNewRoom">
+          <div>
+            Make New Room
+          </div>
           <div>
             <input class="form-control" id="roomName" name="roomName" v-model="roomName"
                    placeholder="title of room"/>
@@ -45,6 +45,11 @@
         rooms: [],
       }
     },
+    sockets: {
+      loadRoom: function () {
+        this.loadRoom()
+      },
+    },
     computed: {
       ...mapState({
         nickname: 'nickname',
@@ -54,6 +59,15 @@
       }),
     },
     methods: {
+      loadRoom () {
+        this.axios.get('/api/roomlist')
+          .then((response) => {
+            this.rooms = response.data
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
       makeNewRoom () {
         this.axios.post('/api/roomlist', {
           title: this.roomName,
@@ -69,10 +83,12 @@
           this.changeRoomOwner(true)
           console.log(response.data._id)
           this.joinRoom(response.data._id)
+          this.$socket.emit('makeNewRoom')
+          this.roomName = ''
+          $('#roomName').blur()
+        }).catch(function (error) {
+          console.log(error)
         })
-          .catch(function (error) {
-            console.log(error)
-          })
         console.log(this.roomName)
       },
       joinRoom (roomID) {
@@ -91,13 +107,7 @@
       ]),
     },
     created () {
-      this.axios.get('/api/roomlist')
-        .then((response) => {
-          this.rooms = response.data
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
+      this.loadRoom()
       console.log(this.destroyedState)
       if (this.destroyedState) {
         $('.messages').append('<li>Room owner destroyed the room.</li>')
@@ -120,14 +130,13 @@
     height: 90vh;
     padding: 3vh;
     overflow-y: auto;
-    display: inline-block;
   }
 
   .room {
-    height: 30vh;
     border: 1px solid;
     border-radius: 10px;
-    width: 30%;
+    width: 250px;
+    height: 200px;
     margin: 10px;
     padding: 10px;
     display: inline-block;

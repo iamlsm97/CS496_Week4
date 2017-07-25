@@ -2,13 +2,11 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-6 col-sm-6">
-        <div>
-          <span>Egyptian Rat Screw +</span>
-        </div>
+        <img src="../../static/typo.png"/>
       </div>
-      <div class="col-md-6 col-sm-6">
+      <div class="col-md-6 col-sm-6 account">
         <div class="logout">
-          <button class="btn btn-primary" @click="onClickLogout">Logout</button>
+          <button class="btn btn-primary btn-logout" @click="onClickLogout">Logout</button>
         </div>
         <div class="account-info">
           <div>Hello, {{nickname}}</div>
@@ -50,11 +48,16 @@
 <style scoped>
   .row {
     height: 10vh;
-    background-color: lightblue;
+    border-bottom: 1px solid;
   }
 
-  .title {
-    height: 100%;
+  img {
+    width: 45%;
+    height: 45%;
+  }
+
+  .account {
+    margin-top: 2vh;
   }
 
   .logout {
@@ -63,8 +66,13 @@
     margin-left: 10px;
   }
 
+  .btn-logout {
+    height: 6vh;
+  }
+
   .account-info {
     display: inline-block;
     float: right;
+    font-size: 25px;
   }
 </style>

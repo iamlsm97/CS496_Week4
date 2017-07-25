@@ -1,8 +1,9 @@
 <template>
   <div class="chat">
     <div class="buttons">
-      <button class="btn btn-primary" @click="exitRoom" :disabled="!joined">Exit Room</button>
-      <button class="btn btn-primary" @click="startGame" :disabled="!joined || numUsers != 3">Game Start</button>
+      <button class="btn btn-primary btn-buttons" @click="exitRoom" :disabled="!joined">Exit Room</button>
+      <button class="btn btn-primary btn-buttons" @click="startGame" :disabled="!joined || numUsers != 3">Game Start
+      </button>
       <b-input-group left="Rule">
         <b-form-select v-model="selected" :options="options" @change.native="optionSelected" class="mb-3">
         </b-form-select>
@@ -15,9 +16,13 @@
       <div class="chatArea">
         <ul class="messages"></ul>
       </div>
-      <input class="inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter" @input="onType"
-             :disabled="!joined"/>
-      <button class="btn btn-primary" @click="sendMessage" :disabled="!joined">Send</button>
+      <div class="input-group">
+        <input class="form-control inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter"
+               @input="onType" :disabled="!joined"/>
+        <div class="input-group-btn">
+          <button class="btn btn-primary" @click="sendMessage" :disabled="!joined">Send</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -400,8 +405,22 @@
 
   }
 
+  .buttons {
+    margin: 2vh 0;
+  }
+
+  .btn-buttons {
+    width: 49%;
+  }
+
+  .input-group {
+    margin: 2vh 0;
+  }
+
   .messages {
-    height: 400px;
+    list-style-type: none;
+    padding: 10px;
+    height: 350px;
     overflow-y: auto;
   }
 
