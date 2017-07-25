@@ -3,9 +3,16 @@
     <div class="buttons">
       <button class="btn btn-primary" @click="exitRoom" :disabled="!joined">Exit Room</button>
       <button class="btn btn-primary" @click="startGame" :disabled="!joined">Game Start</button>
+      <b-input-group left="Rule">
+        <b-form-select v-model="selected" :options="options" @change.native="optionSelected" class="mb-3">
+        </b-form-select>
+      </b-input-group>
+      <div>
+        Rule: <strong>{{ ruleOption }}</strong>
+      </div>
     </div>
     <div class="chatSide">
-      <div class="chatArea" ref="p">
+      <div class="chatArea">
         <ul class="messages"></ul>
       </div>
       <input class="inputMessage" placeholder="Type here..." v-model="message" @keydown.13="hitEnter" @input="onType"
@@ -44,6 +51,24 @@
         message: '',
         typing: false,
         lastTypingTime: '',
+        selected: null,
+        ruleOption: null,
+        options: [
+          {
+            text: 'Select a rule',
+            value: null,
+            disabled: true,
+          }, {
+            text: 'Doubles',
+            value: 'Doubles',
+          }, {
+            text: 'Consecutives',
+            value: 'Consecutives',
+          }, {
+            text: 'Both',
+            value: 'Both',
+          },
+        ],
       }
     },
     computed: {
@@ -93,6 +118,10 @@
         this.removeChatTyping(data)
       },
 
+      ruleSelected: function (rule) {
+        this.ruleOption = rule
+      },
+
       disconnect: function () {
         this.log('you have been disconnected')
       },
@@ -123,7 +152,22 @@
         $('.messages').empty()
         this.$router.push('/roomlist')
       },
+      optionSelected (event) {
+        this.$socket.emit('ruleSelected', event.target.value)
+      },
       startGame () {
+        this.axios.put('/api/roomlist/' + this.roomID, {
+          rule: this.selected,
+        })
+          .then((response) => {
+            console.log('Success!')
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        this.$socket.emit('gameStart', {
+          roomID: this.roomID,
+        })
         this.$router.push('/game/' + this.roomID)
       },
       addParticipantsMessage (data) {
@@ -233,7 +277,7 @@
         } else {
           $('.messages').append($el)
         }
-//        $messages[0].scrollTop = $messages[0].scrollHeight
+        $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
 
       // Prevents input from having injected markup
@@ -298,8 +342,15 @@
 
 <style scoped>
   .chatArea {
-    height: 500px;
-    background-color: coral;
+    border: 1px solid;
+    border-radius: 10px;
+    background-color: #eeeeee;
+
+  }
+
+  .messages {
+    height: 400px;
+    overflow-y: auto;
   }
 
   button:disabled, input:disabled {

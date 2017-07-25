@@ -49,6 +49,7 @@
 
 <style scoped>
   .row {
+    height: 10vh;
     background-color: lightblue;
   }
 

@@ -1,16 +1,17 @@
 <template>
   <Layout>
     <div class="roomlist">
-      <div>
-        <div class="room" v-for="room in rooms">
-          <p>title: {{room.title}} </p>
-          <p>maker: {{room.maker}}</p>
-          <p>status: {{room.currentUser}} / {{room.maxUser}}</p>
-          <p>userList: <span v-for="n in room.userList.length"
-                             v-if="n != room.userList.length">{{room.userList[n - 1]}}, </span>
-            <span v-else>{{room.userList[n - 1]}}</span></p>
-          <button class="btn btn-primary" :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
+      <div class="room" v-for="room in rooms">
+        <div>
+          <div>title: {{room.title}} </div>
+          <div>maker: {{room.maker}}</div>
+          <div>status: {{room.currentUser}} / {{room.maxUser}}</div>
+          <div>userList:
+            <span v-for="n in room.userList.length" v-if="n != room.userList.length">{{room.userList[n - 1]}}, </span>
+            <span v-else>{{room.userList[n - 1]}}</span>
+          </div>
         </div>
+        <button class="btn btn-primary" :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
       </div>
     </div>
   </Layout>
@@ -64,6 +65,21 @@
 </script>
 
 <style scoped>
+  .roomlist {
+    height: 90vh;
+    padding: 3vh;
+    overflow-y: auto;
+  }
+
+  .room {
+    border: 1px solid;
+    border-radius: 10px;
+    width: 30%;
+    margin: 10px;
+    padding: 10px;
+    display: inline-block;
+  }
+
   .room:hover {
     background-color: #eeeeee;
   }

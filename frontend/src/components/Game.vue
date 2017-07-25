@@ -1,21 +1,29 @@
 <template>
   <Layout>
-    <div class="gameArea" @click="playCard">
-      Main Game Area
+    <div class="gameArea" :class="{disabled: !eventListener}" @click="playCard">
+      click to play a card, press space to get  cards
       <div class="deckArea">
         <div class="deckCard">deck</div>
       </div>
       <div class="playerArea">
-        <div class="playerCard" :class="{myTurn: turn===0}">player0</div>
-        <div class="playerCard" :class="{myTurn: turn===1}">player1</div>
-        <div class="playerCard" :class="{myTurn: turn===2}">player2</div>
-        <div class="playerCard" :class="{myTurn: turn===3}">player3</div>
+        <div class="playerCard" :class="{myTurn: turn===0}">
+          <div>player0</div>
+          <div>{{player0CardList.length}}</div>
+        </div>
+        <div class="playerCard" :class="{myTurn: turn===1}">
+          <div>player1</div>
+          <div>{{player1CardList.length}}</div>
+        </div>
+        <div class="playerCard" :class="{myTurn: turn===2}">
+          <div>player2</div>
+          <div>{{player2CardList.length}}</div>
+        </div>
+        <div class="playerCard" :class="{myTurn: turn===3}">
+          <div>player3</div>
+          <div>{{player3CardList.length}}</div>
+        </div>
       </div>
     </div>
-    <b-form-select v-model="selected" :options="options" class="mb-3">
-    </b-form-select>
-    <div>Selected: <strong>{{ selected }}</strong></div>
-    <button @click="gameStart">Start Game</button>
     <div>{{ player0CardList }} {{ player1CardList }} {{ player2CardList }} {{ player3CardList }} {{ gameCardList }}
     </div>
 
@@ -55,7 +63,8 @@
           }, {
             text: 'Both',
             value: 'Both',
-          }],
+          },
+        ],
       }
     },
     sockets: {
@@ -100,6 +109,7 @@
           console.log('game disabled')
           this.eventListener = false
         }
+        $('.messages').append('<li>' + data.player + ' is dead</li>')
       },
       gameOver: function (data) {
         console.log('game over')
@@ -110,6 +120,7 @@
         this.gameCardList = data.gameCardList
         console.log('game disabled')
         this.eventListener = false
+        $('.messages').append('<li>' + data.player + ' win the game!</li>')
       },
       turnChange: function (data) {
         console.log(data)
@@ -137,20 +148,6 @@
           this.$socket.emit('playCard')
         }
       },
-      gameStart: function () {
-        this.axios.put('/api/roomlist/' + this.roomID, {
-          rule: this.selected,
-        })
-          .then((response) => {
-            console.log('Success!')
-          })
-          .catch(function (error) {
-            console.log(error)
-          })
-        this.$socket.emit('gameStart', {
-          roomID: this.roomID,
-        })
-      },
     },
     created () {
       window.addEventListener('keyup', function (event) {
@@ -172,6 +169,12 @@
   .gameArea {
     border: 1px solid;
     font-size: 30px;
+  }
+
+  .disabled {
+    background-color: #A9A9A9;
+    -webkit-filter: grayscale(70%);
+    filter: grayscale(70%);
   }
 
   .deckCard {
