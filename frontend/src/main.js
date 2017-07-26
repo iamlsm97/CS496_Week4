@@ -21,7 +21,7 @@ Vue.use(BootstrapVue)
 import socketio from 'socket.io-client'
 import VueSocketio from 'vue-socket.io'
 
-Vue.use(VueSocketio, socketio('http://localhost:3000'), store)
+Vue.use(VueSocketio, socketio('http://13.124.41.33:3000'), store)
 
 import 'expose-loader?$!expose-loader?jQuery!jquery'
 import 'bootstrap'
