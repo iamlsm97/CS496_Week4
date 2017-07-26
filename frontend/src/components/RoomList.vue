@@ -23,7 +23,7 @@
             <span v-else>{{room.userList[n - 1]}}</span>
           </div>
         </div>
-        <button class="btn btn-primary btn-join" :disabled="!!joined" @click="joinRoom(room._id)">Join Room</button>
+        <button class="btn btn-primary btn-join" :disabled="joined || room.full || !room.open" @click="joinRoom(room._id)">Join Room</button>
       </div>
     </div>
   </Layout>

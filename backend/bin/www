@@ -121,6 +121,8 @@ io.on('connection', function (socket) {
         console.log(room.userList)
         room.userList.push(socket.nickname)
         room.currentUser = room.currentUser + 1
+        if(room.currentUser === 4)
+          room.full = true
         room.save()
       }
     })
@@ -509,9 +511,49 @@ io.on('connection', function (socket) {
         socket.emit('addUserError')
       }
       else {
-        room.userList.splice(room.userList.indexOf(socket.nickname), 1)
+        let idx = room.userList.indexOf(socket.nickname)
+        if (!room.open) {
+          if (idx === room.turn) {
+            currentIndex = room.currentAlive.indexOf(room.turn)
+            nextIndex = (currentIndex + 1) % room.currentAlive.length
+            console.log(currentIndex)
+            console.log(nextIndex)
+            room.turn = room.currentAlive[nextIndex]
+          }
+          room.currentAlive.splice(room.currentAlive.indexOf(idx), 1)
+          switch (idx) {
+            case 0:
+              room.gameCardList = [...room.player0CardList, ...room.gameCardList]
+              room.player0CardList = []
+              break
+            case 1:
+              room.gameCardList = [...room.player1CardList, ...room.gameCardList]
+              room.player1CardList = []
+              break
+            case 2:
+              room.gameCardList = [...room.player2CardList, ...room.gameCardList]
+              room.player2CardList = []
+              break
+            case 3:
+              room.gameCardList = [...room.player3CardList, ...room.gameCardList]
+              room.player3CardList = []
+              break
+          }
+        }
+        else {
+          room.userList.splice(idx, 1)
+        }
         room.currentUser = room.currentUser - 1
+        room.full = false
         room.save()
+        io.to(roomID).emit('userLeftGame', {
+          player0CardList: room.player0CardList,
+          player1CardList: room.player1CardList,
+          player2CardList: room.player2CardList,
+          player3CardList: room.player3CardList,
+          gameCardList: room.gameCardList,
+          turn: room.turn,
+        })
       }
     })
 
@@ -524,6 +566,8 @@ io.on('connection', function (socket) {
         nickname: socket.nickname,
         numUsers: numUsers[roomID],
       })
+
+      io.emit('loadRoom')
     }
     socket.leave(roomID)
     console.log(data.roomOwner)

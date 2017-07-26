@@ -8,6 +8,7 @@ var userSchema = new Schema({
 var roomSchema = new Schema({
   title: String,
   maker: String,
+  full: Boolean,
   open: Boolean,
   maxUser: Number,
   currentUser: Number,

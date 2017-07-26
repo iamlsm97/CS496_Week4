@@ -146,6 +146,14 @@
         $('.messages').append($messageDiv)
         $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
+      userLeftGame: function (data) {
+        this.player0CardList = data.player0CardList
+        this.player1CardList = data.player1CardList
+        this.player2CardList = data.player2CardList
+        this.player3CardList = data.player3CardList
+        this.gameCardList = data.gameCardList
+        this.changeTurn(data.turn)
+      },
       userDead: function (data) {
         console.log('you lost')
         this.player0CardList = data.player0CardList
