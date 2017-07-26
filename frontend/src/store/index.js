@@ -9,6 +9,7 @@ const store = {
   state: {
     nickname,
     roomID: '',
+    roomTitle: '',
     joined: false,
     turn: 0,
     roomOwner: false,
@@ -23,6 +24,9 @@ const store = {
     },
     changeRoomID (state, roomID) {
       state.roomID = roomID
+    },
+    changeRoomTitle (state, roomTitle) {
+      state.roomTitle = roomTitle
     },
     changeJoined (state, joined) {
       state.joined = joined
@@ -49,6 +53,9 @@ const store = {
     },
     changeRoomID ({ commit }, roomID) {
       commit('changeRoomID', roomID)
+    },
+    changeRoomTitle ({ commit }, roomTitle) {
+      commit('changeRoomID', roomTitle)
     },
     changeJoined ({ commit }, joined) {
       commit('changeJoined', joined)

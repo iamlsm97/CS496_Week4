@@ -103,15 +103,17 @@
         console.log(this.roomName)
       },
       joinRoom (roomID) {
+        console.log('in joinRoom method')
         console.log(roomID)
         this.changeRoomID(roomID)
         this.changeJoined(true)
         this.$socket.emit('addUser', {
-          roomID: this.roomID,
+          roomID: roomID,
         })
       },
       ...mapActions([
         'changeRoomID',
+        'changeRoomTitle',
         'changeJoined',
         'changeRoomOwner',
         'changeNumUsers',

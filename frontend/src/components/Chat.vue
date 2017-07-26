@@ -3,7 +3,9 @@
     <div class="buttons">
 
       <button class="btn btn-primary btn-buttons" @click="exitRoom" :disabled="!joined">Exit Room</button>
-      <button class="btn btn-primary btn-buttons" @click="startGame" :disabled="!joined || numUsers != 3 || ruleOption == null">Game Start</button>
+      <button class="btn btn-primary btn-buttons" @click="startGame"
+              :disabled="!joined || numUsers != 3 || ruleOption == null">Game Start
+      </button>
       <div v-if="roomOwner">
         <b-input-group left="Rule">
           <b-form-select v-model="selected" :options="options" @change.native="optionSelected" class="mb-3">
@@ -73,7 +75,7 @@
             value: 'Consecutives',
           }, {
             text: 'Doubles and Consecutives',
-            value: 'D & C',
+            value: 'Doubles and Consecutives',
           }, {
             text: 'Sandwiches',
             value: 'Sandwiches',
@@ -88,6 +90,7 @@
       ...mapState({
         nickname: 'nickname',
         roomID: 'roomID',
+        roomTitle: 'roomTitle',
         joined: 'joined',
         roomOwner: 'roomOwner',
         numUsers: 'numUsers',
@@ -100,7 +103,9 @@
         console.log(data)
         this.connected = true
         $('.messages').empty()
-        this.ruleOption = data.rule
+        if (data.rule) {
+          this.ruleOption = data.rule
+        }
         // Display the welcome message
         const message = 'Welcome to ERS+ Chat – '
         this.log(message, {
@@ -201,6 +206,10 @@
         this.changeJoined(false)
         console.log(this.roomOwner)
         $('.messages').empty()
+
+        this.changeNumUsers(0)
+        console.log('in exitroom')
+        console.log(this.roomID)
         if (this.roomOwner) {
           this.changeRoomOwner(false)
           this.axios.delete('/api/roomlist/' + this.roomID).then((response) => {

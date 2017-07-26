@@ -2,6 +2,7 @@
   <Layout>
     <div class="gameArea" :class="{disabled: !eventListener}" @click="playCard">
       <div class="direction">click to play a card, press space to get cards</div>
+      <div class="rule">Rule: {{rule}}</div>
       <div class="deckCard">
         <img :src="imageCalculator"/>
       </div>
@@ -63,6 +64,7 @@
         player2CardList: [],
         player3CardList: [],
         gameCardList: [],
+        rule: '',
         options: [
           {
             text: 'Select a rule',
@@ -100,6 +102,7 @@
         this.player2CardList = data.player2CardList
         this.player3CardList = data.player3CardList
         this.gameCardList = data.gameCardList
+        this.rule = data.rule
         this.eventListener = true
       },
       hitWin: function (data) {
@@ -277,6 +280,11 @@
 
   .direction {
     margin: 3vh 0;
+    font-size: 20px;
+  }
+
+  .rule {
+    margin: 0;
     font-size: 30px;
   }
 
@@ -321,7 +329,7 @@
   img {
     width: 30%;
     height: 30%;
-    margin: 4vh;
+    margin: 3vh;
   }
 
 </style>
