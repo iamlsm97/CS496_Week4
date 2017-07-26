@@ -1,9 +1,9 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var mongoose = require('mongoose')
+var Schema = mongoose.Schema
 
 var userSchema = new Schema({
   nickname: String, // primary key
-}, {versionKey: false});
+}, { versionKey: false })
 
 var roomSchema = new Schema({
   title: String,
@@ -21,7 +21,7 @@ var roomSchema = new Schema({
   turn: Number,
   rule: String,
   currentAlive: Array,
-}, {versionKey: false})
+}, { versionKey: false })
 
 module.exports = {
   User: mongoose.model('user', userSchema),

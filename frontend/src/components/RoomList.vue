@@ -23,7 +23,9 @@
             <span v-else>{{room.userList[n - 1]}}</span>
           </div>
         </div>
-        <button class="btn btn-primary btn-join" :disabled="joined || room.full || !room.open" @click="joinRoom(room._id)">Join Room</button>
+        <button class="btn btn-primary btn-join" :disabled="joined || room.full || !room.open"
+                @click="joinRoom(room._id)">Join Room
+        </button>
       </div>
     </div>
   </Layout>
@@ -91,20 +93,15 @@
         }).then((response) => {
           console.log('Made new room!')
           this.changeRoomOwner(true)
-          console.log(response.data._id)
           this.joinRoom(response.data._id)
           this.$socket.emit('makeNewRoom')
           this.roomName = ''
           $('#roomName').blur()
         }).catch(function (error) {
           console.log(error)
-          console.log('fuck fuck')
         })
-        console.log(this.roomName)
       },
       joinRoom (roomID) {
-        console.log('in joinRoom method')
-        console.log(roomID)
         this.changeRoomID(roomID)
         this.changeJoined(true)
         this.$socket.emit('addUser', {

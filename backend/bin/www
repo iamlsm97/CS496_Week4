@@ -44,7 +44,6 @@ let numUsers = {}
 let hits = []
 
 let hitHelper = function (socket, roomID, message, room1, pcl) {
-  console.log(room1)
   if (pcl.length === 0) {
     io.to(roomID).emit('userDead', {
       player: socket.nickname,
@@ -112,20 +111,15 @@ io.on('connection', function (socket) {
 
     roomID = data.roomID
 
-    console.log('roomID in addUser receiver')
-    console.log(roomID)
-
     Models.Room.findById(roomID, function (err, room) {
       if (err) {
         console.log('add user error')
         socket.emit('addUserError')
       }
       else {
-        console.log(room)
-        console.log(room.userList)
         room.userList.push(socket.nickname)
         room.currentUser = room.currentUser + 1
-        if(room.currentUser === 4)
+        if (room.currentUser === 4)
           room.full = true
         room.save()
       }
@@ -143,7 +137,6 @@ io.on('connection', function (socket) {
         console.log('add user error')
       }
       else if (room.rule) {
-        console.log('Selected :' + room.rule)
         socket.emit('login', {
           numUsers: numUsers[roomID],
           rule: room.rule,
@@ -185,7 +178,6 @@ io.on('connection', function (socket) {
 
     for (let i = cards.length; i; i--) {
       let j = Math.floor(Math.random() * i)
-      console.log(j)
       let temp = cards[j]
       cards[j] = cards[i - 1]
       cards[i - 1] = temp
@@ -214,11 +206,8 @@ io.on('connection', function (socket) {
   // when client clicks, executes playing a card
   socket.on('hit', function (data) {
     console.log('-----someone hit!')
-    console.log(socket.nickname)
     hits.push(socket.nickname)
-    console.log(hits)
     roomID = data.roomID
-    console.log(roomID)
     let correct = false
 
     Models.Room.findById(roomID, function (err, room) {
@@ -515,13 +504,10 @@ io.on('connection', function (socket) {
 
     roomID = data.roomID
 
-    console.log('in exitRoom')
-    console.log(roomID)
-
     Models.Room.findById(roomID, function (err, room) {
       if (err) {
         console.log('exit room error')
-        socket.emit('addUserError')
+        socket.emit('exitRoomError')
       }
       else {
         let idx = room.userList.indexOf(socket.nickname)
@@ -529,8 +515,6 @@ io.on('connection', function (socket) {
           if (idx === room.turn) {
             currentIndex = room.currentAlive.indexOf(room.turn)
             nextIndex = (currentIndex + 1) % room.currentAlive.length
-            console.log(currentIndex)
-            console.log(nextIndex)
             room.turn = room.currentAlive[nextIndex]
           }
           room.currentAlive.splice(room.currentAlive.indexOf(idx), 1)
@@ -583,7 +567,6 @@ io.on('connection', function (socket) {
       io.emit('loadRoom')
     }
     socket.leave(roomID)
-    console.log(data.roomOwner)
     if (data.roomOwner) {
       console.log("-----socket roomDestroyed")
       io.to(roomID).emit('roomDestroyed')
@@ -638,13 +621,8 @@ io.on('connection', function (socket) {
         }
         room.gameCardList.push(play)
 
-        console.log(room.turn)
-        console.log(room.currentAlive)
-
         currentIndex = room.currentAlive.indexOf(room.turn)
         nextIndex = (currentIndex + 1) % room.currentAlive.length
-        console.log(currentIndex)
-        console.log(nextIndex)
         room.turn = room.currentAlive[nextIndex]
 
         switch (preTurn) {
@@ -704,7 +682,6 @@ io.on('connection', function (socket) {
             break
         }
 
-        console.log(room.turn)
         room.save(() => {
           if (room.currentAlive.length === 1) {
             io.to(roomID).emit('gameOver', {

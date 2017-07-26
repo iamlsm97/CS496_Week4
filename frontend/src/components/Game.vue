@@ -207,7 +207,6 @@
         $('.messages').animate({ scrollTop: $('.messages').prop('scrollHeight') }, 300)
       },
       turnChange: function (data) {
-        console.log(data)
         this.changeTurn(data.turn)
         this.player0CardList = data.player0CardList
         this.player1CardList = data.player1CardList
@@ -223,9 +222,6 @@
         turn: 'turn',
       }),
       imageCalculator: function () {
-        console.log('fuck')
-        console.log(this.gameCardList)
-        console.log(this.gameCardList.length)
         if (this.gameCardList.length > 0) {
           return '../../static/cards/' + this.gameCardList[this.gameCardList.length - 1] + '.png'
         } else {

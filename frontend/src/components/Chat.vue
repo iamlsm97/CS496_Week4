@@ -100,7 +100,6 @@
     sockets: {
       // Whenever the server emits 'login', log the login message
       login: function (data) {
-        console.log(data)
         this.connected = true
         $('.messages').empty()
         if (data.rule) {
@@ -115,7 +114,6 @@
       },
 
       moveToGame: function () {
-        console.log(this.roomOwner)
         if (this.roomOwner) {
           this.$socket.emit('gameStart', {
             roomID: this.roomID,
@@ -134,7 +132,6 @@
         this.log(data.nickname + ' joined')
         this.addParticipantsMessage(data)
         this.changeNumUsers(this.numUsers + 1)
-        console.log(this.numUsers)
       },
 
       // Whenever the server emits 'user left', log it in the chat body
@@ -143,7 +140,6 @@
         this.addParticipantsMessage(data)
         this.removeChatTyping(data)
         this.changeNumUsers(this.numUsers - 1)
-        console.log(this.numUsers)
       },
       // if room destroyed
       roomDestroyed: function () {
@@ -155,7 +151,6 @@
           roomID: this.roomID,
         })
         this.changeDestroyedState(true)
-        console.log('destroyedState: ' + this.destroyedState)
         this.$router.push('/roomlist')
       },
       // Whenever the server emits 'typing', show the typing message
@@ -204,12 +199,9 @@
           roomID: this.roomID,
         })
         this.changeJoined(false)
-        console.log(this.roomOwner)
         $('.messages').empty()
 
         this.changeNumUsers(0)
-        console.log('in exitroom')
-        console.log(this.roomID)
         if (this.roomOwner) {
           this.changeRoomOwner(false)
           this.axios.delete('/api/roomlist/' + this.roomID).then((response) => {
